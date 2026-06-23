@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Network, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { motion } from 'framer-motion';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const TalentGraph = () => {
   const [nodes, setNodes] = useState([]);
@@ -8,23 +9,26 @@ const TalentGraph = () => {
 
   useEffect(() => {
     // Mocking a network graph layout
+    const topCand = mockCandidates[0];
+    const secondCand = mockCandidates[1];
+    
     const initialNodes = [
-      { id: 'c1', label: 'John Doe', type: 'candidate', x: 400, y: 300, size: 60, color: '#ff5722' },
-      { id: 'c2', label: 'Sarah S.', type: 'candidate', x: 200, y: 150, size: 50, color: '#ff5722' },
-      { id: 's1', label: 'RAG', type: 'skill', x: 300, y: 200, size: 40, color: '#000000' },
-      { id: 's2', label: 'LLM', type: 'skill', x: 500, y: 200, size: 40, color: '#000000' },
-      { id: 'o1', label: 'OpenAI', type: 'company', x: 400, y: 100, size: 45, color: '#22c55e' },
-      { id: 'i1', label: 'Healthcare', type: 'industry', x: 300, y: 400, size: 45, color: '#3b82f6' },
-      { id: 'p1', label: 'Startup', type: 'project', x: 500, y: 400, size: 40, color: '#a855f7' },
+      { id: `c${topCand.id}`, label: topCand.name.split(' ')[0], type: 'candidate', x: 400, y: 300, size: 60, color: '#ff5722' },
+      { id: `c${secondCand.id}`, label: secondCand.name.split(' ')[0], type: 'candidate', x: 200, y: 150, size: 50, color: '#ff5722' },
+      { id: 's1', label: topCand.skills[0], type: 'skill', x: 300, y: 200, size: 40, color: '#000000' },
+      { id: 's2', label: topCand.skills[1] || 'Cloud', type: 'skill', x: 500, y: 200, size: 40, color: '#000000' },
+      { id: 'o1', label: 'TechCorp', type: 'company', x: 400, y: 100, size: 45, color: '#22c55e' },
+      { id: 'i1', label: topCand.domain, type: 'industry', x: 300, y: 400, size: 45, color: '#3b82f6' },
+      { id: 'p1', label: 'AI Platform', type: 'project', x: 500, y: 400, size: 40, color: '#a855f7' },
     ];
 
     const initialLinks = [
-      { source: 'c1', target: 's1' },
-      { source: 'c1', target: 's2' },
-      { source: 'c1', target: 'i1' },
-      { source: 'c1', target: 'p1' },
-      { source: 'c2', target: 's1' },
-      { source: 'c2', target: 'o1' },
+      { source: `c${topCand.id}`, target: 's1' },
+      { source: `c${topCand.id}`, target: 's2' },
+      { source: `c${topCand.id}`, target: 'i1' },
+      { source: `c${topCand.id}`, target: 'p1' },
+      { source: `c${secondCand.id}`, target: 's1' },
+      { source: `c${secondCand.id}`, target: 'o1' },
       { source: 's1', target: 'o1' },
       { source: 's2', target: 'o1' },
     ];

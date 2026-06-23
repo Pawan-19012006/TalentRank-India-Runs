@@ -1,18 +1,20 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, MapPin, Briefcase, DollarSign, Calendar, Sparkles, BookOpen, GitCommit, Target, AlertTriangle, MessageCircle } from 'lucide-react';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const CandidateProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const candidate = mockCandidates.find(c => c.id.toString() === id) || mockCandidates[0];
+
   const skillData = [
-    { subject: 'Python', A: 95, B: 90, fullMark: 100 },
-    { subject: 'LLM/RAG', A: 90, B: 85, fullMark: 100 },
-    { subject: 'Cloud (AWS)', A: 80, B: 95, fullMark: 100 },
+    { subject: candidate.skills[0] || 'Core', A: 95, B: 90, fullMark: 100 },
+    { subject: candidate.skills[1] || 'Secondary', A: 90, B: 85, fullMark: 100 },
+    { subject: candidate.skills[2] || 'Tools', A: 80, B: 95, fullMark: 100 },
     { subject: 'System Design', A: 85, B: 90, fullMark: 100 },
-    { subject: 'Leadership', A: 88, B: 75, fullMark: 100 },
+    { subject: 'Leadership', A: candidate.leadership_score * 10, B: 75, fullMark: 100 },
   ];
 
   return (
@@ -28,18 +30,18 @@ const CandidateProfile = () => {
         {/* Left Column: Summary & AI Score */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl border border-border shadow-sm text-center">
-            <img src="https://i.pravatar.cc/150?u=1" alt="Profile" className="w-24 h-24 rounded-full border-4 border-surface mx-auto mb-4 object-cover" />
-            <h2 className="text-xl font-bold text-black">John Doe</h2>
-            <p className="text-textMuted font-medium mb-4">Lead AI Engineer at TechCorp</p>
+            <img src={`https://i.pravatar.cc/150?u=${candidate.id}`} alt="Profile" className="w-24 h-24 rounded-full border-4 border-surface mx-auto mb-4 object-cover" />
+            <h2 className="text-xl font-bold text-black">{candidate.name}</h2>
+            <p className="text-textMuted font-medium mb-4">{candidate.skills[0]} Engineer at {candidate.domain}</p>
             
             <div className="grid grid-cols-2 gap-4 text-left text-sm mb-6">
               <div className="flex items-center gap-2">
                 <Briefcase size={16} className="text-primary" />
-                <span>6 Years Exp</span>
+                <span>{candidate.experience_years} Years Exp</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>Bangalore</span>
+                <span>Remote</span>
               </div>
               <div className="flex items-center gap-2">
                 <DollarSign size={16} className="text-primary" />
@@ -47,7 +49,7 @@ const CandidateProfile = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-primary" />
-                <span>30 Days Notice</span>
+                <span>{candidate.notice_period_days} Days Notice</span>
               </div>
             </div>
 
@@ -69,7 +71,7 @@ const CandidateProfile = () => {
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 border-primary/30 relative z-10">
               <div className="absolute inset-0 rounded-full border-8 border-primary border-t-transparent border-l-transparent transform rotate-45"></div>
               <div className="text-center">
-                <span className="text-4xl font-bold">94<span className="text-2xl">%</span></span>
+                <span className="text-4xl font-bold">{candidate.overall_score}<span className="text-2xl">%</span></span>
               </div>
             </div>
             <p className="text-sm text-white/80 mt-4 relative z-10">

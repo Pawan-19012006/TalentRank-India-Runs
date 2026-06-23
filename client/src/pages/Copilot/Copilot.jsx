@@ -6,6 +6,7 @@ const Copilot = () => {
     { role: 'ai', content: 'Hi Jane. I am your Recruiter Copilot. You can ask me to find specific candidate profiles, analyze the talent pool, or explain my ranking decisions.' }
   ]);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -16,28 +17,73 @@ const Copilot = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
     
-    const newMsgs = [...messages, { role: 'user', content: input }];
+    const userMessage = { role: 'user', content: input };
+    const newMsgs = [...messages, userMessage];
     setMessages(newMsgs);
     setInput('');
+    setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      let aiResponse = "I can certainly help with that. Let me analyze the candidate pool.";
-      const lowerInput = input.toLowerCase();
-      
-      if (lowerInput.includes('rag') || lowerInput.includes('healthcare')) {
-        aiResponse = "I found 12 candidates with strong RAG experience in the Healthcare domain. The top match is John Doe. Would you like me to add him to your shortlist?";
-      } else if (lowerInput.includes('30 days') || lowerInput.includes('notice period')) {
-        aiResponse = "Filtering the top 50 candidates, there are 8 individuals who can join within 30 days. Sarah Smith is ranked highest among them with a score of 91%.";
-      } else if (lowerInput.includes('why') && lowerInput.includes('above')) {
-        aiResponse = "Candidate A is ranked above Candidate B primarily because A has 2 more years of production experience deploying LLMs, and a significantly higher leadership score (9/10 vs 6/10), which carries a 20% weight in your current search configuration.";
+    try {
+      const response = await fetch('http://localhost:5001/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMsgs })
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiResponseContent = '';
+      let reasoningTokens = null;
+
+      setMessages(msgs => [...msgs, { role: 'ai', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.content) {
+                aiResponseContent += data.content;
+                setMessages(msgs => {
+                  const updated = [...msgs];
+                  updated[updated.length - 1].content = aiResponseContent;
+                  return updated;
+                });
+              }
+              if (data.reasoningTokens !== undefined) {
+                reasoningTokens = data.reasoningTokens;
+                setMessages(msgs => {
+                  const updated = [...msgs];
+                  updated[updated.length - 1].reasoningTokens = reasoningTokens;
+                  return updated;
+                });
+              }
+              if (data.error) {
+                console.error('API Error:', data.error);
+              }
+            } catch (e) {
+              // ignore parse errors for partial chunks
+            }
+          }
+        }
       }
-
-      setMessages([...newMsgs, { role: 'ai', content: aiResponse }]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages(msgs => [...msgs, { role: 'ai', content: 'Sorry, I encountered an error connecting to the AI.' }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const suggestions = [
@@ -73,7 +119,13 @@ const Copilot = () => {
                 ? 'bg-black text-white rounded-tr-none' 
                 : 'bg-white border border-border text-black rounded-tl-none shadow-sm'
             }`}>
-              {msg.content}
+              {msg.content || (msg.role === 'ai' && <span className="animate-pulse">...</span>)}
+              {msg.reasoningTokens !== undefined && (
+                <div className="mt-2 text-xs text-textMuted border-t border-border pt-2">
+                  <Sparkles size={12} className="inline mr-1 text-primary" />
+                  Reasoning tokens: {msg.reasoningTokens}
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -105,7 +157,7 @@ const Copilot = () => {
           />
           <button 
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isTyping}
             className="absolute right-2 w-8 h-8 flex items-center justify-center bg-primary text-white rounded-lg disabled:opacity-50 hover:bg-primaryDark transition-colors"
           >
             <Send size={16} />

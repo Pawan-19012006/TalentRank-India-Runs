@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle, BarChart2, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const Explainability = () => {
   const shapData = [
@@ -25,10 +26,10 @@ const Explainability = () => {
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl border border-border shadow-sm">
             <h2 className="font-bold text-lg mb-4 flex items-center gap-2 border-b border-border pb-3">
-              <HelpCircle size={18} className="text-primary" /> Why is John Doe Ranked #1?
+              <HelpCircle size={18} className="text-primary" /> Why is {mockCandidates[0].name} Ranked #1?
             </h2>
             <p className="text-sm text-textMuted mb-4">
-              John achieved an overall match score of <strong className="text-black">94%</strong>. Here is the exact breakdown of features contributing to this score.
+              {mockCandidates[0].name.split(' ')[0]} achieved an overall match score of <strong className="text-black">{mockCandidates[0].overall_score}%</strong>. Here is the exact breakdown of features contributing to this score.
             </p>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -80,7 +81,7 @@ const Explainability = () => {
                   <ArrowRight size={16} />
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="line-through text-white/50">#2 Sarah Smith</span>
+                  <span className="line-through text-white/50">#2 {mockCandidates[1].name}</span>
                   <span className="text-white font-bold">Becomes #1</span>
                 </div>
               </div>
@@ -91,7 +92,7 @@ const Explainability = () => {
                   <ArrowRight size={16} />
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="line-through text-white/50">#1 John Doe</span>
+                  <span className="line-through text-white/50">#1 {mockCandidates[0].name}</span>
                   <span className="text-white font-bold">Drops to #4</span>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckSquare, MoreVertical, Calendar, MessageSquare, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const Shortlist = () => {
   const [columns, setColumns] = useState([
@@ -9,30 +10,21 @@ const Shortlist = () => {
       title: 'Shortlisted',
       count: 3,
       color: 'bg-orange-100 text-orange-700 border-orange-200',
-      cards: [
-        { id: 'c1', name: 'John Doe', role: 'Lead AI Engineer', score: 94, company: 'TechCorp' },
-        { id: 'c2', name: 'Michael Chen', role: 'AI Researcher', score: 90, company: 'DataSys' },
-        { id: 'c3', name: 'David Kim', role: 'Machine Learning Eng', score: 87, company: 'InnovateAI' },
-      ]
+      cards: mockCandidates.slice(0, 3).map(c => ({ id: `c${c.id}`, name: c.name, role: `${c.skills[0]} Engineer`, score: c.overall_score, company: c.domain }))
     },
     {
       id: 'interview',
       title: 'Interview',
       count: 2,
       color: 'bg-blue-100 text-blue-700 border-blue-200',
-      cards: [
-        { id: 'c4', name: 'Sarah Smith', role: 'Senior ML Engineer', score: 92, company: 'StartupX', interviewDate: 'Tomorrow, 2:00 PM' },
-        { id: 'c5', name: 'Emily Davis', role: 'AI Architect', score: 89, company: 'CloudNet', interviewDate: 'Thu, 10:00 AM' },
-      ]
+      cards: mockCandidates.slice(3, 5).map(c => ({ id: `c${c.id}`, name: c.name, role: `${c.skills[0]} Engineer`, score: c.overall_score, company: c.domain, interviewDate: 'Tomorrow, 2:00 PM' }))
     },
     {
       id: 'offer',
       title: 'Offer Extended',
       count: 1,
       color: 'bg-purple-100 text-purple-700 border-purple-200',
-      cards: [
-        { id: 'c6', name: 'Robert Johnson', role: 'Lead AI Engineer', score: 96, company: 'FinTech Solutions' },
-      ]
+      cards: mockCandidates.slice(5, 6).map(c => ({ id: `c${c.id}`, name: c.name, role: `${c.skills[0]} Engineer`, score: c.overall_score, company: c.domain }))
     },
     {
       id: 'hired',

@@ -1,15 +1,24 @@
 import React from 'react';
 import { Search, Filter, Sparkles, TrendingUp, ChevronDown, Check, X, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const Rankings = () => {
   const navigate = useNavigate();
 
-  const candidates = [
-    { id: 1, name: 'John Doe', role: 'Lead AI Engineer at TechCorp', exp: '6 Yrs', loc: 'Bangalore', score: 94, skills: 96, experience: 91, behavior: 93, activity: 89, avatar: 'https://i.pravatar.cc/150?u=1' },
-    { id: 2, name: 'Sarah Smith', role: 'Senior ML Engineer at StartupX', exp: '5 Yrs', loc: 'Remote', score: 91, skills: 92, experience: 88, behavior: 95, activity: 90, avatar: 'https://i.pravatar.cc/150?u=2' },
-    { id: 3, name: 'Michael Chen', role: 'AI Researcher at DataSys', exp: '8 Yrs', loc: 'Mumbai', score: 88, skills: 95, experience: 94, behavior: 82, activity: 75, avatar: 'https://i.pravatar.cc/150?u=3' },
-  ];
+  const candidates = mockCandidates.slice(0, 10).map((c) => ({
+    id: c.id,
+    name: c.name,
+    role: `${c.skills[0]} Engineer`,
+    exp: `${c.experience_years} Yrs`,
+    loc: c.domain,
+    score: c.overall_score,
+    skills: Math.floor(c.overall_score * 0.95),
+    experience: c.experience_years * 8,
+    behavior: c.leadership_score * 10,
+    activity: 85,
+    avatar: `https://i.pravatar.cc/150?u=${c.id}`
+  })).sort((a, b) => b.score - a.score);
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4">

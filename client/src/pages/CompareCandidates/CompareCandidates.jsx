@@ -1,12 +1,18 @@
 import React from 'react';
 import { Check, X, Sparkles, Trophy, ArrowRight } from 'lucide-react';
+import mockCandidates from '../../data/mockCandidates.json';
 
 const CompareCandidates = () => {
-  const candidates = [
-    { id: 1, name: 'John Doe', role: 'Lead AI Engineer', score: 95, skills: true, leadership: 9, stability: 8, avatar: 'https://i.pravatar.cc/150?u=1' },
-    { id: 2, name: 'Sarah Smith', role: 'Senior ML Engineer', score: 92, skills: true, leadership: 7, stability: 9, avatar: 'https://i.pravatar.cc/150?u=2' },
-    { id: 3, name: 'Michael Chen', role: 'AI Researcher', score: 90, skills: true, leadership: 6, stability: 7, avatar: 'https://i.pravatar.cc/150?u=3' },
-  ];
+  const candidates = mockCandidates.slice(0, 3).map((c) => ({
+    id: c.id,
+    name: c.name,
+    role: `${c.skills[0]} Engineer`,
+    score: c.overall_score,
+    skills: true,
+    leadership: c.leadership_score,
+    stability: Math.floor(c.experience_years / 2) + 4,
+    avatar: `https://i.pravatar.cc/150?u=${c.id}`
+  })).sort((a, b) => b.score - a.score);
 
   const features = [
     { key: 'Match Score', getValue: (c) => <span className="font-bold text-primary text-lg">{c.score}%</span> },
@@ -14,8 +20,8 @@ const CompareCandidates = () => {
     { key: 'Leadership Score', getValue: (c) => <span className="font-medium">{c.leadership}/10</span> },
     { key: 'Career Stability', getValue: (c) => <span className="font-medium">{c.stability}/10</span> },
     { key: 'Cloud Experience', getValue: (c) => c.id === 1 ? 'AWS (Expert)' : c.id === 2 ? 'GCP (Mid)' : 'Azure (Mid)' },
-    { key: 'Notice Period', getValue: (c) => c.id === 1 ? '30 Days' : c.id === 2 ? '15 Days' : '60 Days' },
-    { key: 'Expected Salary', getValue: (c) => c.id === 1 ? '₹25LPA' : c.id === 2 ? '₹22LPA' : '₹28LPA' },
+    { key: 'Notice Period', getValue: (c) => `${mockCandidates.find(m => m.id === c.id)?.notice_period_days || 30} Days` },
+    { key: 'Experience', getValue: (c) => `${mockCandidates.find(m => m.id === c.id)?.experience_years || 5} Years` },
   ];
 
   return (
@@ -75,10 +81,10 @@ const CompareCandidates = () => {
         </div>
         <div className="flex-1 relative z-10">
           <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
-            <Sparkles className="text-primary" size={20} /> AI Verdict: Recommend John Doe
+            <Sparkles className="text-primary" size={20} /> AI Verdict: Recommend {candidates[0]?.name}
           </h3>
           <p className="text-white/80 text-sm">
-            John has the highest overall match score, strongly aligns with the core skills (Python, RAG), and possesses a superior leadership score compared to the others. He is the safest and most optimal choice for the Lead AI Engineer position.
+            {candidates[0]?.name.split(' ')[0]} has the highest overall match score, strongly aligns with the core skills, and possesses a superior leadership score compared to the others. He is the safest and most optimal choice for the position.
           </p>
         </div>
         <div className="relative z-10 shrink-0 w-full md:w-auto">
