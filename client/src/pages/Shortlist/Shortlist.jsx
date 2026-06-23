@@ -35,6 +35,41 @@ const Shortlist = () => {
     }
   ]);
 
+  const handleDragStart = (e, cardId, sourceColId) => {
+    e.dataTransfer.setData('cardId', cardId);
+    e.dataTransfer.setData('sourceColId', sourceColId);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+  };
+
+  const handleDrop = (e, targetColId) => {
+    e.preventDefault();
+    const cardId = e.dataTransfer.getData('cardId');
+    const sourceColId = e.dataTransfer.getData('sourceColId');
+
+    if (sourceColId === targetColId) return;
+
+    setColumns(prev => {
+      const newColumns = JSON.parse(JSON.stringify(prev));
+      const sourceColIndex = newColumns.findIndex(c => c.id === sourceColId);
+      const targetColIndex = newColumns.findIndex(c => c.id === targetColId);
+      
+      const cardIndex = newColumns[sourceColIndex].cards.findIndex(c => c.id === cardId);
+      if (cardIndex === -1) return prev;
+      
+      const [card] = newColumns[sourceColIndex].cards.splice(cardIndex, 1);
+      newColumns[targetColIndex].cards.push(card);
+      
+      // Update counts
+      newColumns[sourceColIndex].count = newColumns[sourceColIndex].cards.length;
+      newColumns[targetColIndex].count = newColumns[targetColIndex].cards.length;
+      
+      return newColumns;
+    });
+  };
+
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col space-y-6">
       <div className="flex items-center justify-between shrink-0">
@@ -51,7 +86,12 @@ const Shortlist = () => {
 
       <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
         {columns.map(col => (
-          <div key={col.id} className="w-80 flex flex-col shrink-0 bg-surface/50 rounded-xl border border-border p-4">
+          <div 
+            key={col.id} 
+            className="w-80 flex flex-col shrink-0 bg-surface/50 rounded-xl border border-border p-4"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, col.id)}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${col.color}`}>
                 {col.title} ({col.count})
@@ -66,6 +106,8 @@ const Shortlist = () => {
                 <motion.div 
                   layoutId={card.id}
                   key={card.id} 
+                  draggable={true}
+                  onDragStart={(e) => handleDragStart(e, card.id, col.id)}
                   className="bg-white p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/30 transition-colors"
                 >
                   <div className="flex justify-between items-start mb-2">
