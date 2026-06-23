@@ -10,6 +10,7 @@ import TalentGraph from '../pages/TalentGraph/TalentGraph';
 import Shortlist from '../pages/Shortlist/Shortlist';
 import Explainability from '../pages/Explainability/Explainability';
 import Copilot from '../pages/Copilot/Copilot';
+import JobDetails from '../pages/JobDetails/JobDetails';
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes = () => {
           <Route path="shortlist" element={<Shortlist />} />
           <Route path="explainability" element={<Explainability />} />
           <Route path="copilot" element={<Copilot />} />
+          <Route path="job/:id" element={<JobDetails />} />
         </Route>
       </Routes>
     </Router>

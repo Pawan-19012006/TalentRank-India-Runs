@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Users, Search, CheckCircle, TrendingUp, Upload, FileText, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -57,12 +58,13 @@ const Dashboard = () => {
           </div>
           <div className="divide-y divide-border">
             {[
-              { role: 'AI Engineer', date: '2 hours ago', candidates: 450, status: 'Active' },
-              { role: 'Data Scientist', date: 'Yesterday', candidates: 210, status: 'Active' },
-              { role: 'Backend Developer', date: '3 days ago', candidates: 890, status: 'Reviewing' },
-            ].map((search, i) => (
-              <div key={i} className="p-6 flex items-center justify-between hover:bg-surface transition-colors cursor-pointer">
-                <div className="flex items-center gap-4">
+              { id: '1', role: 'AI Engineer', date: '2 hours ago', candidates: 450, status: 'Active' },
+              { id: '2', role: 'Data Scientist', date: 'Yesterday', candidates: 210, status: 'Active' },
+              { id: '3', role: 'Backend Developer', date: '3 days ago', candidates: 890, status: 'Reviewing' },
+            ].map((search) => (
+              <Link to={`/job/${search.id}`} key={search.id} className="block p-6 hover:bg-surface transition-colors cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-textMuted">
                     <Search size={18} />
                   </div>
@@ -82,7 +84,8 @@ const Dashboard = () => {
                     {search.status}
                   </span>
                 </div>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
