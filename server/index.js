@@ -22,6 +22,7 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
 
         const systemPrompt = `You are an AI Recruiter Copilot. Answer user questions concisely based ONLY on the following mock data containing 50 applicants. 
 Applicant Data:
@@ -37,7 +38,7 @@ If asked a general question, answer as a helpful recruiter assistant. Do not men
 
         const stream = await openrouter.chat.send({
             chatRequest: {
-                model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+                model: "poolside/laguna-xs.2:free",
                 messages: [
                     { role: "system", content: systemPrompt },
                     ...formattedMessages
@@ -46,10 +47,14 @@ If asked a general question, answer as a helpful recruiter assistant. Do not men
             }
         });
 
+        console.log("Connected to OpenRouter, starting stream...");
         for await (const chunk of stream) {
             const content = chunk.choices?.[0]?.delta?.content;
             if (content) {
                 res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            } else if (chunk.choices?.[0]?.delta?.reasoning) {
+                // Send an empty update so frontend doesn't hang
+                res.write(`data: ${JSON.stringify({ ping: true })}\n\n`);
             }
 
             if (chunk.usage && chunk.usage.reasoningTokens !== undefined) {

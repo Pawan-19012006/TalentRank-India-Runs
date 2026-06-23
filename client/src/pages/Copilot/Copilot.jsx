@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, Sparkles, User, FileText, Bot } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const Copilot = () => {
   const [messages, setMessages] = useState([
@@ -119,7 +121,35 @@ const Copilot = () => {
                 ? 'bg-black text-white rounded-tr-none' 
                 : 'bg-white border border-border text-black rounded-tl-none shadow-sm'
             }`}>
-              {msg.content || (msg.role === 'ai' && <span className="animate-pulse">...</span>)}
+              {msg.role === 'user' ? (
+                msg.content
+              ) : (
+                <div className="text-sm overflow-hidden">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2 space-y-1" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2 space-y-1" {...props} />,
+                      li: ({node, ...props}) => <li {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-bold text-black" {...props} />,
+                      table: ({node, ...props}) => (
+                        <div className="overflow-x-auto mb-4 border border-border rounded-lg">
+                          <table className="min-w-full divide-y divide-border text-xs text-left" {...props} />
+                        </div>
+                      ),
+                      thead: ({node, ...props}) => <thead className="bg-surface/50" {...props} />,
+                      tbody: ({node, ...props}) => <tbody className="divide-y divide-border bg-white" {...props} />,
+                      tr: ({node, ...props}) => <tr className="hover:bg-surface/30 transition-colors" {...props} />,
+                      th: ({node, ...props}) => <th className="px-3 py-2.5 font-semibold text-black" {...props} />,
+                      td: ({node, ...props}) => <td className="px-3 py-2 whitespace-nowrap" {...props} />
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                  {msg.content === '' && <span className="animate-pulse">...</span>}
+                </div>
+              )}
               {msg.reasoningTokens !== undefined && (
                 <div className="mt-2 text-xs text-textMuted border-t border-border pt-2">
                   <Sparkles size={12} className="inline mr-1 text-primary" />
