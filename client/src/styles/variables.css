@@ -1,0 +1,9 @@
+:root {
+  --color-primary: #10b981; /* Emerald 500 */
+  --color-primary-dark: #059669; /* Emerald 600 */
+  --color-bg-main: #f9fafb; /* Gray 50 */
+  --color-bg-secondary: #ffffff; /* Pure white */
+  --color-text-primary: #111827; /* Gray 900 */
+  --color-text-secondary: #6b7280; /* Gray 500 */
+  --color-border: #e5e7eb; /* Gray 200 */
+}
