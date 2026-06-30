@@ -20,14 +20,14 @@ export const RankingProvider = ({ children }) => {
       title: 'Shortlisted',
       count: 3,
       color: 'bg-orange-50 text-orange-600 border-orange-200',
-      cards: [1, 2, 3] // Storing candidate IDs
+      cards: ['CAND_0000001', 'CAND_0000002', 'CAND_0000003'] // Storing candidate IDs
     },
     {
       id: 'interview',
       title: 'Interview',
       count: 2,
       color: 'bg-blue-50 text-blue-600 border-blue-200',
-      cards: [4, 5]
+      cards: ['CAND_0000004', 'CAND_0000005']
     },
     {
       id: 'offer',

@@ -5,22 +5,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useRanking } from '../../store/rankingStore';
 
-const flowData = [
-  { name: 'May 19', value: 200 },
-  { name: 'May 26', value: 300 },
-  { name: 'Jun 2', value: 250 },
-  { name: 'Jun 9', value: 400 },
-  { name: 'Jun 16', value: 350 },
-  { name: 'Jun 23', value: 500 },
-];
 
-const sourceData = [
-  { name: 'LinkedIn', value: 45, color: '#0f172a' },
-  { name: 'Referrals', value: 25, color: '#22c55e' },
-  { name: 'Career Page', value: 15, color: '#f59e0b' },
-  { name: 'Indeed', value: 10, color: '#8b5cf6' },
-  { name: 'Others', value: 5, color: '#f43f5e' },
-];
 
 const StatCard = ({ title, value, icon: Icon, trend, trendUp, iconColor, iconBg, delay }) => (
   <motion.div 
@@ -53,6 +38,82 @@ const Dashboard = () => {
   const totalCandidates = candidates.length;
   const shortlistedCount = shortlistColumns.find(c => c.id === 'shortlisted')?.cards.length || 0;
   const avgMatchScore = Math.round(candidates.reduce((acc, curr) => acc + curr.score, 0) / (totalCandidates || 1));
+
+  const flowData = React.useMemo(() => {
+    const counts = {};
+    candidates.forEach(c => {
+      const dateStr = c._raw?.redrob_signals?.signup_date;
+      if (dateStr) {
+        const month = dateStr.substring(0, 7); // YYYY-MM
+        counts[month] = (counts[month] || 0) + 1;
+      }
+    });
+    const sortedDates = Object.keys(counts).sort().slice(-6);
+    if (sortedDates.length === 0) return [{ name: 'N/A', value: 0 }];
+    return sortedDates.map(date => ({ name: date, value: counts[date] }));
+  }, [candidates]);
+
+  const sourceData = React.useMemo(() => {
+    const counts = {};
+    candidates.forEach(c => {
+      const loc = c._raw?.profile?.country || 'Unknown';
+      counts[loc] = (counts[loc] || 0) + 1;
+    });
+    const colors = ['#0f172a', '#22c55e', '#f59e0b', '#8b5cf6', '#f43f5e'];
+    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+    const top = sorted.slice(0, 4);
+    const others = sorted.slice(4).reduce((sum, item) => sum + item[1], 0);
+    if (others > 0) top.push(['Others', others]);
+    
+    return top.map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }));
+  }, [candidates]);
+
+  const scatterData = React.useMemo(() => {
+    // Sample top 100 to avoid clutter
+    return candidates.slice(0, 100).map(c => ({
+      x: c.experience || parseInt(c.exp) || 0,
+      y: c.score,
+      z: 100,
+      name: c.name
+    }));
+  }, [candidates]);
+
+
+  const activePipelines = React.useMemo(() => {
+    const roles = {};
+    candidates.forEach(c => {
+      const role = c._raw?.profile?.current_title || 'Software Engineer';
+      if (!roles[role]) roles[role] = { count: 0, scoreSum: 0, highestScore: 0 };
+      roles[role].count += 1;
+      roles[role].scoreSum += c.score;
+      if (c.score > roles[role].highestScore) roles[role].highestScore = c.score;
+    });
+
+    const colors = [
+      'bg-green-100 text-green-600',
+      'bg-orange-100 text-orange-500',
+      'bg-purple-100 text-purple-600',
+      'bg-indigo-100 text-indigo-600'
+    ];
+
+    return Object.entries(roles)
+      .sort((a,b) => b[1].count - a[1].count)
+      .slice(0, 4)
+      .map(([role, data], i) => {
+        const words = role.split(' ');
+        const init = words.length > 1 ? words[0][0] + words[1][0] : role.substring(0, 2);
+        return {
+          role,
+          date: 'Active now',
+          candidates: data.count,
+          status: 'Active',
+          match: data.highestScore,
+          init: init.toUpperCase(),
+          bg: colors[i % colors.length]
+        };
+      });
+  }, [candidates]);
+
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-8">
@@ -103,12 +164,7 @@ const Dashboard = () => {
           </div>
 
           <div className="divide-y divide-border flex-1 bg-white">
-            {[
-              { role: 'Senior AI Engineer', date: '2 hours ago', candidates: 450, status: 'Active', match: 94, init: 'SE', bg: 'bg-green-100 text-green-600' },
-              { role: 'Data Scientist', date: 'Yesterday', candidates: 210, status: 'Active', match: 88, init: 'DS', bg: 'bg-orange-100 text-orange-500' },
-              { role: 'ML Engineer', date: '2 days ago', candidates: 184, status: 'Active', match: 87, init: 'ML', bg: 'bg-purple-100 text-purple-600' },
-              { role: 'Frontend Developer', date: '3 days ago', candidates: 132, status: 'Active', match: 75, init: 'FE', bg: 'bg-indigo-100 text-indigo-600' },
-            ].map((search, i) => (
+            {activePipelines.map((search, i) => (
               <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group">
                 <div className="flex items-center gap-4 w-1/2">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${search.bg}`}>
@@ -166,14 +222,11 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis type="number" dataKey="x" name="Score" domain={[50, 100]} tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} />
-                  <YAxis type="number" dataKey="y" name="Pipeline" hide domain={[0, 4]} />
+                  <XAxis type="number" dataKey="x" name="Experience Score" domain={['dataMin', 'dataMax']} tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} />
+                  <YAxis type="number" dataKey="y" name="Match Score" domain={[50, 100]} />
                   <ZAxis type="number" dataKey="z" range={[50, 400]} name="Candidates" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Scatter name="SE" data={[{ x: 94, y: 3, z: 200 }, { x: 85, y: 3, z: 150 }, { x: 70, y: 3, z: 100 }]} fill="#10b981" />
-                  <Scatter name="DS" data={[{ x: 88, y: 2, z: 120 }, { x: 80, y: 2, z: 60 }, { x: 65, y: 2, z: 30 }]} fill="#f59e0b" />
-                  <Scatter name="ML" data={[{ x: 87, y: 1, z: 90 }, { x: 75, y: 1, z: 50 }, { x: 60, y: 1, z: 44 }]} fill="#8b5cf6" />
-                  <Scatter name="FE" data={[{ x: 75, y: 0, z: 80 }, { x: 65, y: 0, z: 40 }, { x: 55, y: 0, z: 12 }]} fill="#6366f1" />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ color: '#111827' }} />
+                  <Scatter name="Candidates" data={scatterData} fill="#10b981" />
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
@@ -334,6 +387,7 @@ const Dashboard = () => {
                   </Pie>
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#111827' }}
                   />
                 </PieChart>
               </ResponsiveContainer>

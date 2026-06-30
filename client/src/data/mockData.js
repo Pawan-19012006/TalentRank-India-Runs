@@ -1,86 +1,38 @@
-export const candidates = [
-  { 
-    id: 1, 
-    name: 'John Doe', 
-    role: 'Lead AI Engineer at TechCorp', 
-    exp: '6 Yrs', 
-    loc: 'Bangalore', 
-    score: 94, 
-    skills: 96, 
-    experience: 91, 
-    behavior: 93, 
-    activity: 89, 
-    avatar: 'https://i.pravatar.cc/150?u=1',
-    hidden_talent_score: 60,
-    hidden_talent_factors: [],
-    background_tags: { company: 'BigTech' }
-  },
-  { 
-    id: 2, 
-    name: 'Sarah Smith', 
-    role: 'Senior ML Engineer at MegaData', 
-    exp: '5 Yrs', 
-    loc: 'Remote', 
-    score: 91, 
-    skills: 92, 
-    experience: 88, 
-    behavior: 95, 
-    activity: 90, 
-    avatar: 'https://i.pravatar.cc/150?u=2',
-    hidden_talent_score: 65,
-    hidden_talent_factors: [],
-    background_tags: { company: 'BigTech' }
-  },
-  { 
-    id: 3, 
-    name: 'Michael Chen', 
-    role: 'AI Researcher at AICloud', 
-    exp: '8 Yrs', 
-    loc: 'Mumbai', 
-    score: 88, 
-    skills: 95, 
-    experience: 94, 
-    behavior: 82, 
-    activity: 75, 
-    avatar: 'https://i.pravatar.cc/150?u=3',
-    hidden_talent_score: 55,
-    hidden_talent_factors: [],
-    background_tags: { company: 'BigTech' }
-  },
-  { 
-    id: 4, 
-    name: 'David Lee', 
-    role: 'ML Engineer at GlobalTech', 
-    exp: '6 Yrs', 
-    loc: 'Pune', 
-    score: 85, 
-    skills: 90, 
-    experience: 85, 
-    behavior: 88, 
-    activity: 70, 
-    avatar: 'https://i.pravatar.cc/150?u=4',
-    hidden_talent_score: 60,
-    hidden_talent_factors: [],
-    background_tags: { company: 'BigTech' }
-  },
-  { 
-    id: 5, 
-    name: 'Priya Sharma', 
-    role: 'Solo AI Developer / Indie Hacker', 
-    exp: '3 Yrs', 
-    loc: 'Remote', 
-    score: 78, 
-    skills: 98, 
-    experience: 60, 
-    behavior: 90, 
-    activity: 100, 
-    avatar: 'https://i.pravatar.cc/150?u=5',
-    hidden_talent_score: 95,
-    hidden_talent_factors: [
-      'Top 1% contributor on GitHub (GenAI)',
-      'Built and scaled a solo AI agent to 10k users',
-      'High learning velocity (mastered 3 frameworks in 6 months)'
-    ],
-    background_tags: { company: 'Startup' }
-  },
-];
+import rawCandidates from './sample_candidates.json';
+
+export const candidates = rawCandidates.map((cand, index) => {
+  const profile = cand.profile || {};
+  const signals = cand.redrob_signals || {};
+  const skillsList = cand.skills || [];
+
+  // Calculate some dummy scores based on the actual data
+  const skillsScore = Math.min(100, Math.round(50 + skillsList.length * 3));
+  const expScore = Math.min(100, Math.round(profile.years_of_experience * 10));
+  const behaviorScore = Math.min(100, Math.round(70 + (signals.recruiter_response_rate || 0) * 30));
+  const activityScore = Math.min(100, Math.round(50 + (signals.applications_submitted_30d || 0) * 5 + (signals.profile_views_received_30d || 0)));
+  const hiddenTalentScore = signals.github_activity_score > 0 ? signals.github_activity_score : 50;
+  
+  const hiddenFactors = [];
+  if (signals.github_activity_score > 70) hiddenFactors.push('High GitHub Activity');
+  if (signals.interview_completion_rate > 0.8) hiddenFactors.push('Excellent Interview Completion Rate');
+  if (skillsList.some(s => s.proficiency === 'expert')) hiddenFactors.push('Expert in specific skills');
+
+  return {
+    id: cand.candidate_id,
+    name: profile.anonymized_name || `Candidate ${index + 1}`,
+    role: `${profile.current_title || 'Professional'} at ${profile.current_company || 'Unknown'}`,
+    exp: `${profile.years_of_experience || 0} Yrs`,
+    loc: profile.location || 'Unknown',
+    score: Math.round((skillsScore * 0.4) + (expScore * 0.3) + (behaviorScore * 0.2) + (hiddenTalentScore * 0.1)), // Initial base score
+    skills: skillsScore,
+    experience: expScore,
+    behavior: behaviorScore,
+    activity: activityScore,
+    avatar: `https://i.pravatar.cc/150?u=${cand.candidate_id}`,
+    hidden_talent_score: hiddenTalentScore,
+    hidden_talent_factors: hiddenFactors,
+    background_tags: { company: profile.current_industry || 'Unknown' },
+    // Keeping raw data just in case components need it later
+    _raw: cand
+  };
+});

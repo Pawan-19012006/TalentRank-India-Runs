@@ -92,6 +92,7 @@ const JobUnderstanding = () => {
                   <Tooltip 
                     cursor={{fill: '#f9fafb'}}
                     contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#111827' }}
                   />
                   <Bar dataKey="level" fill="#10b981" radius={[0, 4, 4, 0]} barSize={24} />
                 </BarChart>

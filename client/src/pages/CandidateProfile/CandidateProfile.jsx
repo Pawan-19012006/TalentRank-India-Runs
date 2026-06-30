@@ -9,7 +9,7 @@ const CandidateProfile = () => {
   const navigate = useNavigate();
   const { candidates, logAction, addToCompare, shortlistColumns, setShortlistColumns } = useRanking();
 
-  const candidate = candidates.find(c => c.id === parseInt(id)) || candidates[0];
+  const candidate = candidates.find(c => c.id === id) || candidates[0];
 
   const skillData = [
     { subject: 'Python', A: 95, B: 90, fullMark: 100 },
@@ -137,26 +137,23 @@ const CandidateProfile = () => {
           <div className="card-panel p-6">
             <h3 className="font-bold text-lg mb-6 text-black">Career Timeline</h3>
             <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
-              {[
-                { year: '2025', role: 'Lead AI Engineer', company: 'TechCorp', desc: 'Leading a team of 5, deployed RAG pipeline serving 1M requests/day.' },
-                { year: '2023', role: 'Senior AI Engineer', company: 'TechCorp', desc: 'Built internal LLM tools, improved search relevance by 40%.' },
-                { year: '2021', role: 'Software Engineer', company: 'StartupX', desc: 'Backend development using Python and AWS.' },
-                { year: '2020', role: 'Intern', company: 'DataSys', desc: 'Data cleaning and basic model training.' },
-              ].map((item, i) => (
+              {(candidate._raw?.career_history || []).slice(0, 4).map((item, i) => {
+                const year = new Date(item.start_date).getFullYear();
+                return (
                 <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-gray-100 bg-primary/10 text-primary shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
                     <Briefcase size={16} />
                   </div>
                   <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-gray-50 shadow-sm">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-bold text-black">{item.role}</h4>
-                      <span className="text-xs font-bold text-primary">{item.year}</span>
+                      <h4 className="font-bold text-black">{item.title}</h4>
+                      <span className="text-xs font-bold text-primary">{year}</span>
                     </div>
                     <p className="text-sm font-medium text-textMuted">{item.company}</p>
-                    <p className="text-sm text-textMuted mt-2">{item.desc}</p>
+                    <p className="text-sm text-textMuted mt-2">{item.description}</p>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>

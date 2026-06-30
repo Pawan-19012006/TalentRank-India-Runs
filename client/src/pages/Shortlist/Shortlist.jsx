@@ -19,7 +19,7 @@ const Shortlist = () => {
 
   const handleDrop = (e, targetColumnId) => {
     e.preventDefault();
-    const candidateId = parseInt(e.dataTransfer.getData('candidateId'));
+    const candidateId = e.dataTransfer.getData('candidateId');
     const sourceColumnId = e.dataTransfer.getData('sourceColumnId');
     if (candidateId && sourceColumnId) {
       moveCandidate(candidateId, sourceColumnId, targetColumnId);

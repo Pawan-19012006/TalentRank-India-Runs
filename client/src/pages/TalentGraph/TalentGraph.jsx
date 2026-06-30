@@ -9,35 +9,35 @@ const TalentGraph = () => {
   const [links, setLinks] = useState([]);
 
   useEffect(() => {
-    // Dynamically build graph based on top 3 candidates
-    const topCandidates = candidates.slice(0, 3);
+    // Dynamically build graph based on top candidates
+    const topCandidates = candidates.slice(0, 15);
     
     let newNodes = [];
     let newLinks = [];
     
     // Central Node (The Job)
-    newNodes.push({ id: 'job', label: 'Senior AI Engineer', type: 'job', x: 400, y: 300, size: 80, color: '#f59e0b' });
+    newNodes.push({ id: 'job', label: 'Ideal Candidate', type: 'job', x: 400, y: 300, size: 80, color: '#f59e0b' });
     
     // Candidate Nodes & Links
     topCandidates.forEach((c, index) => {
       const cId = `c_${c.id}`;
       // Calculate positions in a rough circle around the center
       const angle = (index / topCandidates.length) * Math.PI * 2;
-      const radius = 180;
+      const radius = 220;
       newNodes.push({ 
         id: cId, 
         label: c.name, 
         type: 'candidate', 
         x: 400 + Math.cos(angle) * radius, 
         y: 300 + Math.sin(angle) * radius, 
-        size: 60, 
+        size: 55, 
         color: '#0ea5e9' 
       });
       
       newLinks.push({ source: 'job', target: cId });
       
       // Skills Nodes
-      const skills = c.skills > 90 ? ['LLM', 'RAG'] : ['Python', 'Cloud'];
+      const skills = (c._raw?.skills || []).slice(0, 2).map(s => s.name);
       skills.forEach((skill, sIdx) => {
         const sId = `s_${skill}`;
         if (!newNodes.find(n => n.id === sId)) {
@@ -45,9 +45,9 @@ const TalentGraph = () => {
              id: sId,
              label: skill,
              type: 'skill',
-             x: (400 + Math.cos(angle) * radius) + (Math.cos(sIdx * Math.PI) * 100),
-             y: (300 + Math.sin(angle) * radius) + (Math.sin(sIdx * Math.PI) * 100),
-             size: 45,
+             x: (400 + Math.cos(angle) * radius) + (Math.cos(sIdx * Math.PI) * 80),
+             y: (300 + Math.sin(angle) * radius) + (Math.sin(sIdx * Math.PI) * 80),
+             size: 40,
              color: '#18181b'
            });
         }
