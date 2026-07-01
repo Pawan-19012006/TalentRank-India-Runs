@@ -94,7 +94,7 @@ const CreateSearch = () => {
             <div className="flex border-b border-border mb-4">
               {[
                 { id: 'paste', label: 'Paste JD', icon: Type },
-                { id: 'upload', label: 'Upload PDF/DOCX', icon: Upload },
+                { id: 'upload', label: 'Upload PDF/DOCX/ZIP', icon: Upload },
                 { id: 'ai', label: 'Generate with AI', icon: Sparkles },
               ].map((tab) => (
                 <button
@@ -133,7 +133,7 @@ const CreateSearch = () => {
                   className="hidden" 
                   ref={fileInputRef} 
                   onChange={handleFileChange} 
-                  accept=".pdf,.docx,.txt"
+                  accept=".pdf,.docx,.txt,.zip"
                 />
                 
                 {uploadedFile ? (
