@@ -1,0 +1,57 @@
+assessment_skill,candidate_count
+YOLO,1195
+CNN,1174
+Feature Engineering,1174
+Weights & Biases,1173
+Forecasting,1167
+MLOps,1159
+Speech Recognition,1159
+BentoML,1157
+OpenCV,1155
+Data Science,1147
+Object Detection,1145
+TTS,1140
+Diffusion Models,1133
+ASR,1124
+Reinforcement Learning,1124
+GANs,1122
+Image Classification,1120
+Time Series,1111
+Computer Vision,1111
+Kubeflow,1105
+Statistical Modeling,1088
+MLflow,1085
+Information Retrieval,343
+PEFT,341
+pgvector,340
+PyTorch,340
+Milvus,340
+Qdrant,336
+Machine Learning,335
+QLoRA,329
+Sentence Transformers,328
+Learning to Rank,327
+Embeddings,327
+RAG,326
+Vector Search,326
+TensorFlow,326
+Pinecone,325
+Recommendation Systems,325
+LLMs,323
+Weaviate,321
+LoRA,320
+OpenSearch,319
+Hugging Face Transformers,319
+scikit-learn,317
+Haystack,314
+Python,312
+Prompt Engineering,312
+BM25,309
+NLP,306
+FAISS,303
+Semantic Search,301
+LangChain,295
+LlamaIndex,291
+Elasticsearch,285
+Deep Learning,284
+Fine-tuning LLMs,282
