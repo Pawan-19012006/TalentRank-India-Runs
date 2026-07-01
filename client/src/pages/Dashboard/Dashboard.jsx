@@ -1,26 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Briefcase, Bookmark, Activity, ChevronDown, MoreVertical, Sparkles, User, TrendingUp, ShieldAlert, ArrowRight, Lightbulb, BarChart as BarChartIcon } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter, CartesianGrid, ZAxis } from 'recharts';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useRanking } from '../../store/rankingStore';
-
-const flowData = [
-  { name: 'May 19', value: 200 },
-  { name: 'May 26', value: 300 },
-  { name: 'Jun 2', value: 250 },
-  { name: 'Jun 9', value: 400 },
-  { name: 'Jun 16', value: 350 },
-  { name: 'Jun 23', value: 500 },
-];
-
-const sourceData = [
-  { name: 'LinkedIn', value: 45, color: '#0f172a' },
-  { name: 'Referrals', value: 25, color: '#22c55e' },
-  { name: 'Career Page', value: 15, color: '#f59e0b' },
-  { name: 'Indeed', value: 10, color: '#8b5cf6' },
-  { name: 'Others', value: 5, color: '#f43f5e' },
-];
+import { analyticsService } from '../../services/analyticsService';
 
 const StatCard = ({ title, value, icon: Icon, trend, trendUp, iconColor, iconBg, delay }) => (
   <motion.div 
@@ -48,11 +31,43 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp, iconColor, iconBg,
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { candidates, shortlistColumns } = useRanking();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const data = await analyticsService.getDashboardStats('default_search');
+        setStats(data);
+      } catch (err) {
+        console.error('Failed to load dashboard metrics:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Loading recruitment intelligence dashboard...</p>
+      </div>
+    );
+  }
+
+  // Fallbacks for metrics and graph vectors
+  const pipelines = stats?.pipelines || [];
+  const flowData = stats?.flowData || [];
+  const sourceData = stats?.sourceData || [];
+  const scatterData = stats?.scatterData || [];
   
-  const totalCandidates = candidates.length;
-  const shortlistedCount = shortlistColumns.find(c => c.id === 'shortlisted')?.cards.length || 0;
-  const avgMatchScore = Math.round(candidates.reduce((acc, curr) => acc + curr.score, 0) / (totalCandidates || 1));
+  const totalCandidates = stats?.totalCandidates ?? 0;
+  const activeSearches = stats?.activeSearches ?? 0;
+  const shortlistedCount = stats?.shortlistedCount ?? 0;
+  const avgMatchScore = stats?.avgMatchScore ?? 0;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-8">
@@ -71,7 +86,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Candidates" value={totalCandidates} icon={Users} trend="↑ 14%" trendUp={true} iconBg="bg-green-100" iconColor="text-green-600" delay={0.1} />
-        <StatCard title="Active Searches" value="1" icon={Briefcase} trend="↑ 2" trendUp={true} iconBg="bg-orange-100" iconColor="text-orange-500" delay={0.2} />
+        <StatCard title="Active Searches" value={activeSearches} icon={Briefcase} trend="↑ 2" trendUp={true} iconBg="bg-orange-100" iconColor="text-orange-500" delay={0.2} />
         <StatCard title="Shortlisted" value={shortlistedCount} icon={Bookmark} trend="↑ 24%" trendUp={true} iconBg="bg-purple-100" iconColor="text-purple-600" delay={0.3} />
         <StatCard title="Avg Match Score" value={`${avgMatchScore}%`} trend="↑ 3%" icon={Activity} trendUp={true} iconBg="bg-red-100" iconColor="text-red-500" delay={0.4} />
       </div>
@@ -85,62 +100,68 @@ const Dashboard = () => {
             transition={{ delay: 0.5 }}
             className="card-panel overflow-hidden flex flex-col"
           >
-          <div className="p-6 border-b border-border flex justify-between items-center bg-white">
-            <h2 className="font-bold text-lg text-black flex items-center gap-2">
-              <Activity size={20} className="text-primary" /> Active Pipelines
-            </h2>
-            <button className="text-primary text-sm font-bold hover:text-primary-dark transition-colors flex items-center gap-1">
-              View all pipelines <ArrowRight size={14} />
-            </button>
-          </div>
-          
-          <div className="px-6 py-3 border-b border-border bg-gray-50 flex items-center justify-between text-xs font-bold text-textMuted uppercase tracking-wider">
-            <div className="w-1/2">Pipeline</div>
-            <div className="w-1/6 text-center">Matched</div>
-            <div className="w-1/6 text-center">Top Score</div>
-            <div className="w-1/6 text-center">Status</div>
-            <div className="w-1/6 text-right">Updated</div>
-          </div>
+            <div className="p-6 border-b border-border flex justify-between items-center bg-white">
+              <h2 className="font-bold text-lg text-black flex items-center gap-2">
+                <Activity size={20} className="text-primary" /> Active Pipelines
+              </h2>
+              <button className="text-primary text-sm font-bold hover:text-primary-dark transition-colors flex items-center gap-1">
+                View all pipelines <ArrowRight size={14} />
+              </button>
+            </div>
+            
+            <div className="px-6 py-3 border-b border-border bg-gray-50 flex items-center justify-between text-xs font-bold text-textMuted uppercase tracking-wider">
+              <div className="w-1/2">Pipeline</div>
+              <div className="w-1/6 text-center">Matched</div>
+              <div className="w-1/6 text-center">Top Score</div>
+              <div className="w-1/6 text-center">Status</div>
+              <div className="w-1/6 text-right">Updated</div>
+            </div>
 
-          <div className="divide-y divide-border flex-1 bg-white">
-            {[
-              { role: 'Senior AI Engineer', date: '2 hours ago', candidates: 450, status: 'Active', match: 94, init: 'SE', bg: 'bg-green-100 text-green-600' },
-              { role: 'Data Scientist', date: 'Yesterday', candidates: 210, status: 'Active', match: 88, init: 'DS', bg: 'bg-orange-100 text-orange-500' },
-              { role: 'ML Engineer', date: '2 days ago', candidates: 184, status: 'Active', match: 87, init: 'ML', bg: 'bg-purple-100 text-purple-600' },
-              { role: 'Frontend Developer', date: '3 days ago', candidates: 132, status: 'Active', match: 75, init: 'FE', bg: 'bg-indigo-100 text-indigo-600' },
-            ].map((search, i) => (
-              <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-4 w-1/2">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${search.bg}`}>
-                    {search.init}
+            <div className="divide-y divide-border flex-1 bg-white">
+              {pipelines.length > 0 ? (
+                pipelines.map((search, i) => (
+                  <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group">
+                    <div className="flex items-center gap-4 w-1/2">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${search.bg || 'bg-gray-100 text-gray-600'}`}>
+                        {search.init || 'JD'}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-black text-sm">{search.role}</h4>
+                        <p className="text-xs text-textMuted mt-0.5">Started {search.date}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="w-1/6 text-center font-medium text-sm text-black">{search.candidates}</div>
+                    
+                    <div className="w-1/6 text-center font-bold text-sm" style={{ color: search.match >= 90 ? '#16a34a' : search.match >= 85 ? '#f59e0b' : search.match >= 80 ? '#0ea5e9' : '#e11d48' }}>
+                      {search.match}%
+                    </div>
+                    
+                    <div className="w-1/6 text-center">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-600 border border-green-200">
+                        {search.status}
+                      </span>
+                    </div>
+                    
+                    <div className="w-1/6 text-right flex items-center justify-end gap-2 text-xs text-textMuted">
+                      {search.date}
+                      <button className="text-gray-400 hover:text-black">
+                        <MoreVertical size={16} />
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-black text-sm">{search.role}</h4>
-                    <p className="text-xs text-textMuted mt-0.5">Started {search.date}</p>
-                  </div>
-                </div>
-                
-                <div className="w-1/6 text-center font-medium text-sm text-black">{search.candidates}</div>
-                
-                <div className="w-1/6 text-center font-bold text-sm" style={{ color: search.match >= 90 ? '#16a34a' : search.match >= 85 ? '#f59e0b' : search.match >= 80 ? '#0ea5e9' : '#e11d48' }}>
-                  {search.match}%
-                </div>
-                
-                <div className="w-1/6 text-center">
-                  <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-600 border border-green-200">
-                    {search.status}
-                  </span>
-                </div>
-                
-                <div className="w-1/6 text-right flex items-center justify-end gap-2 text-xs text-textMuted">
-                  {search.date}
-                  <button className="text-gray-400 hover:text-black">
-                    <MoreVertical size={16} />
+                ))
+              ) : (
+                <div className="p-12 text-center text-textMuted flex flex-col items-center justify-center">
+                  <Briefcase size={32} className="text-gray-300 mb-2" />
+                  <p className="text-sm font-medium">No active pipelines found</p>
+                  <p className="text-xs text-textMuted mt-1 mb-4">You have not initialized any candidate searches yet.</p>
+                  <button onClick={() => navigate('/create-search')} className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-dark transition-colors shadow-sm">
+                    Create Search Pipeline
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
           </motion.div>
 
           {/* Match Score Distribution */}
@@ -163,19 +184,24 @@ const Dashboard = () => {
             </div>
             
             <div className="p-6 h-64 bg-white">
-              <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis type="number" dataKey="x" name="Score" domain={[50, 100]} tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} />
-                  <YAxis type="number" dataKey="y" name="Pipeline" hide domain={[0, 4]} />
-                  <ZAxis type="number" dataKey="z" range={[50, 400]} name="Candidates" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Scatter name="SE" data={[{ x: 94, y: 3, z: 200 }, { x: 85, y: 3, z: 150 }, { x: 70, y: 3, z: 100 }]} fill="#10b981" />
-                  <Scatter name="DS" data={[{ x: 88, y: 2, z: 120 }, { x: 80, y: 2, z: 60 }, { x: 65, y: 2, z: 30 }]} fill="#f59e0b" />
-                  <Scatter name="ML" data={[{ x: 87, y: 1, z: 90 }, { x: 75, y: 1, z: 50 }, { x: 60, y: 1, z: 44 }]} fill="#8b5cf6" />
-                  <Scatter name="FE" data={[{ x: 75, y: 0, z: 80 }, { x: 65, y: 0, z: 40 }, { x: 55, y: 0, z: 12 }]} fill="#6366f1" />
-                </ScatterChart>
-              </ResponsiveContainer>
+              {scatterData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                    <XAxis type="number" dataKey="x" name="Score" domain={[50, 100]} tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} />
+                    <YAxis type="number" dataKey="y" name="Pipeline" hide domain={[0, 4]} />
+                    <ZAxis type="number" dataKey="z" range={[50, 400]} name="Candidates" />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    {scatterData.map((scat, idx) => (
+                      <Scatter key={idx} name={scat.name} data={scat.points} fill={scat.fill} />
+                    ))}
+                  </ScatterChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-textMuted text-xs font-medium bg-gray-50 rounded-xl border border-dashed border-border">
+                  No data to plot score distribution
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -200,50 +226,29 @@ const Dashboard = () => {
           </div>
           
           <div className="p-6 space-y-4 flex-1 bg-gray-50/50">
-            <div 
-              onClick={() => navigate('/rankings')}
-              className="bg-white rounded-xl p-4 border border-border hover:shadow-md transition-shadow cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                  <User size={16} />
+            {stats?.alerts?.length > 0 ? (
+              stats.alerts.map((alert, i) => (
+                <div 
+                  key={i}
+                  onClick={() => navigate(alert.link)}
+                  className="bg-white rounded-xl p-4 border border-border hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${alert.iconBg || 'bg-green-100 text-green-600'}`}>
+                      <User size={16} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-black mb-1">{alert.title}</h4>
+                      <p className="text-xs text-textMuted leading-relaxed" dangerouslySetInnerHTML={{ __html: alert.description }}></p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm text-black mb-1">Top Talent Alert</h4>
-                  <p className="text-xs text-textMuted leading-relaxed">3 highly-matched candidates for <b>AI Engineer</b> just became available in your location.</p>
-                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-textMuted text-xs font-medium border border-dashed border-border rounded-xl bg-white">
+                No system recommendations generated yet.
               </div>
-            </div>
-            
-            <div 
-              onClick={() => navigate('/talent-graph')}
-              className="bg-white rounded-xl p-4 border border-border hover:shadow-md transition-shadow cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                  <TrendingUp size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-black mb-1">Skill Trend Update</h4>
-                  <p className="text-xs text-textMuted leading-relaxed"><b>Graph Neural Networks</b> is a fast-rising skill in your pipeline.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div 
-              onClick={() => navigate('/shortlist')}
-              className="bg-white rounded-xl p-4 border border-border hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
-                  <Lightbulb size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-black mb-1">Search Optimization</h4>
-                  <p className="text-xs text-textMuted leading-relaxed mb-2">Consider adding 2 more skills to improve candidate match rate.</p>
-                </div>
-              </div>
-            </div>
+            )}
             
             <div className="pt-4 border-t border-border mt-2">
               <div className="flex items-start gap-4">
@@ -252,7 +257,7 @@ const Dashboard = () => {
                     <TrendingUp size={16} className="text-primary" /> Weekly Activity Summary
                   </h4>
                   <p className="text-xs text-textMuted leading-relaxed">
-                    You've added 12 candidates and closed 2 searches this week.
+                    {stats?.weeklySummary || "Your pipeline metrics are being compiled based on recruiter actions."}
                   </p>
                   <button className="text-primary text-xs font-bold mt-2 hover:text-primary-dark flex items-center gap-1">
                     View full report <ArrowRight size={12} />
@@ -261,9 +266,9 @@ const Dashboard = () => {
                 <div className="relative w-16 h-16 shrink-0 flex flex-col items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90 absolute top-0 left-0">
                     <circle cx="32" cy="32" r="28" fill="none" stroke="#f3f4f6" strokeWidth="6" />
-                    <circle cx="32" cy="32" r="28" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="175.9" strokeDashoffset="43.9" strokeLinecap="round" />
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="175.9" strokeDashoffset={175.9 - (175.9 * (stats?.goalProgress || 0) / 100)} strokeLinecap="round" />
                   </svg>
-                  <span className="text-sm font-bold text-black relative z-10">75%</span>
+                  <span className="text-sm font-bold text-black relative z-10">{stats?.goalProgress || 0}%</span>
                   <span className="text-[8px] text-textMuted absolute -bottom-3 text-center whitespace-nowrap">Goal Progress</span>
                 </div>
               </div>
@@ -286,23 +291,29 @@ const Dashboard = () => {
             </button>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={flowData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#111827', fontWeight: 'bold' }}
-                />
-                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {flowData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={flowData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#111827', fontWeight: 'bold' }}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-textMuted text-xs font-medium bg-gray-50 rounded-xl border border-dashed border-border">
+                No pipeline candidate flow trends logged
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -317,38 +328,46 @@ const Dashboard = () => {
             <button className="text-primary text-sm font-bold hover:text-primary-dark">View all</button>
           </div>
           <div className="flex items-center justify-between h-64 gap-4">
-            <div className="w-[55%] h-full flex items-center justify-center relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={sourceData}
-                    innerRadius={60}
-                    outerRadius={85}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {sourceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="w-[45%] flex flex-col justify-center gap-4">
-              {sourceData.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
-                    <span className="text-textMuted font-medium">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-black">{item.value}%</span>
+            {sourceData.length > 0 ? (
+              <>
+                <div className="w-[55%] h-full flex items-center justify-center relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={sourceData}
+                        innerRadius={60}
+                        outerRadius={85}
+                        paddingAngle={2}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {sourceData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
-            </div>
+                <div className="w-[45%] flex flex-col justify-center gap-4">
+                  {sourceData.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
+                        <span className="text-textMuted font-medium">{item.name}</span>
+                      </div>
+                      <span className="font-bold text-black">{item.value}%</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="h-full w-full flex items-center justify-center text-textMuted text-xs font-medium bg-gray-50 rounded-xl border border-dashed border-border">
+                No sourcing channel distributions logged
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

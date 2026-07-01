@@ -4,8 +4,17 @@ import { useRanking } from '../../store/rankingStore';
 import { useNavigate } from 'react-router-dom';
 
 const CompareCandidates = () => {
-  const { compareList, candidates: allCandidates } = useRanking();
+  const { compareList, candidates: allCandidates, loading } = useRanking();
   const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Comparing candidate profiles...</p>
+      </div>
+    );
+  }
 
   // Get full candidate objects for those in compareList
   const candidates = compareList.map(id => allCandidates.find(c => c.id === id)).filter(Boolean);
@@ -36,7 +45,7 @@ const CompareCandidates = () => {
                     <th className="px-6 py-4 w-48">Feature</th>
                     {candidates.map(c => (
                       <th key={c.id} className="px-6 py-4 text-center min-w-[200px]">
-                        <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-border shadow-sm object-cover" />
+                        <img src={c.avatar || 'https://i.pravatar.cc/150?u=fallback'} alt={c.name} className="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-border shadow-sm object-cover" />
                         <div className="text-black font-bold text-sm">{c.name}</div>
                         <div className="text-xs font-normal mt-0.5">{c.role}</div>
                       </th>

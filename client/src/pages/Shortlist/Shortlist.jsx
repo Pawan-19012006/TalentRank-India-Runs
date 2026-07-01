@@ -5,8 +5,17 @@ import { useRanking } from '../../store/rankingStore';
 import { useNavigate } from 'react-router-dom';
 
 const Shortlist = () => {
-  const { shortlistColumns, candidates, moveCandidate } = useRanking();
+  const { shortlistColumns, candidates, moveCandidate, loading } = useRanking();
   const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Loading recruitment pipelines...</p>
+      </div>
+    );
+  }
 
   const handleDragStart = (e, candidateId, sourceColumnId) => {
     e.dataTransfer.setData('candidateId', candidateId);

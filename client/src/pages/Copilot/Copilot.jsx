@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, Sparkles, User, FileText, Bot } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useRanking } from '../../store/rankingStore';
+import { copilotService } from '../../services/copilotService';
 
 const Copilot = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const Copilot = () => {
     { role: 'ai', content: 'Hi Jane. I am your Recruiter Copilot. You can ask me to find specific candidate profiles, analyze the talent pool, or explain my ranking decisions.' }
   ]);
   const [input, setInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -20,33 +22,18 @@ const Copilot = () => {
     scrollToBottom();
   }, [messages]);
 
-  const generateAIResponse = (userText, currentMsgs) => {
-    setTimeout(() => {
-      let aiResponse = "I'm sorry, I couldn't find a match for that query or candidate. Could you clarify if you're looking for a specific candidate name or skill?";
-      const lowerInput = userText.toLowerCase();
-      
-      const matchedCandidate = candidates.find(c => 
-        lowerInput.includes(c.name.toLowerCase()) || 
-        (lowerInput.split(' ').some(word => word.length > 2 && c.name.toLowerCase().includes(word)))
-      );
-
-      if (matchedCandidate) {
-        const rank = candidates.findIndex(c => c.id === matchedCandidate.id) + 1;
-        aiResponse = `Yes, I found ${matchedCandidate.name}. They are currently ranked #${rank} with a match score of ${matchedCandidate.score}%. They are a ${matchedCandidate.role} based in ${matchedCandidate.loc}.`;
-      } else if (lowerInput.includes('rag') || lowerInput.includes('healthcare')) {
-        aiResponse = "I found 12 candidates with strong RAG experience in the Healthcare domain. The top match is John Doe. Would you like me to add him to your shortlist?";
-      } else if (lowerInput.includes('30 days') || lowerInput.includes('notice period')) {
-        aiResponse = "Filtering the top 50 candidates, there are 8 individuals who can join within 30 days. Sarah Smith is ranked highest among them with a score of 91%.";
-      } else if (lowerInput.includes('why') && lowerInput.includes('above')) {
-        aiResponse = "Candidate A is ranked above Candidate B primarily because A has 2 more years of production experience deploying LLMs, and a significantly higher leadership score (9/10 vs 6/10), which carries a 20% weight in your current search configuration.";
-      } else if (lowerInput.includes('experience')) {
-        aiResponse = `This candidate has a very strong profile. They have relevant production experience matching the core skills for this role, along with high behavioral markers.`;
-      } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('hey')) {
-        aiResponse = "Hello! How can I help you analyze your candidates today?";
-      }
-
-      setMessages([...currentMsgs, { role: 'ai', content: aiResponse }]);
-    }, 1000);
+  const generateAIResponse = async (userText, currentMsgs) => {
+    setIsSending(true);
+    try {
+      const result = await copilotService.sendQuery(userText, candidates);
+      const reply = result?.response || "I didn't receive a response from the AI Copilot.";
+      setMessages([...currentMsgs, { role: 'ai', content: reply }]);
+    } catch (err) {
+      console.error('Failed to communicate with AI Copilot service:', err);
+      setMessages([...currentMsgs, { role: 'ai', content: "I'm sorry, I was unable to connect to the Copilot backend." }]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   useEffect(() => {
@@ -65,15 +52,13 @@ const Copilot = () => {
   }, [location.state]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isSending) return;
     
     const newMsgs = [...messages, { role: 'user', content: input }];
     setMessages(newMsgs);
     setInput('');
     generateAIResponse(input, newMsgs);
   };
-
-
 
   const suggestions = [
     "Find candidates with RAG experience.",
@@ -112,11 +97,23 @@ const Copilot = () => {
             </div>
           </div>
         ))}
+        {isSending && (
+          <div className="flex gap-4">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-primary text-white shadow-sm">
+              <Bot size={16} />
+            </div>
+            <div className="max-w-[80%] rounded-2xl p-4 text-sm bg-white border border-border text-textMuted rounded-tl-none flex items-center gap-2">
+              <div className="w-2 h-2 bg-textMuted rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-textMuted rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-2 h-2 bg-textMuted rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 bg-gray-50 border-t border-border shrink-0">
-        {messages.length === 1 && (
+        {messages.length === 1 && !isSending && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
             {suggestions.map((s, i) => (
               <button 
@@ -135,12 +132,13 @@ const Copilot = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            disabled={isSending}
             placeholder="Ask me anything about your candidates or search..." 
-            className="w-full pl-4 pr-12 py-3 bg-white border border-border text-black rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-textMuted shadow-sm"
+            className="w-full pl-4 pr-12 py-3 bg-white border border-border text-black rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-textMuted shadow-sm disabled:opacity-50"
           />
           <button 
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isSending}
             className="absolute right-2 w-8 h-8 flex items-center justify-center bg-primary text-white rounded-lg disabled:opacity-50 hover:bg-primary-dark transition-colors"
           >
             <Send size={16} />

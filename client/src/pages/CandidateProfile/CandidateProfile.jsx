@@ -1,23 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, MapPin, Briefcase, DollarSign, Calendar, Sparkles, BookOpen, GitCommit, Target, AlertTriangle, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, DollarSign, Calendar, Sparkles, BookOpen, GitCommit, Target, AlertTriangle, MessageCircle, User } from 'lucide-react';
 import { useRanking } from '../../store/rankingStore';
+import { candidateService } from '../../services/candidateService';
 
 const CandidateProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { candidates, logAction, addToCompare, shortlistColumns, setShortlistColumns } = useRanking();
+  const { logAction, addToCompare, setShortlistColumns } = useRanking();
 
-  const candidate = candidates.find(c => c.id === parseInt(id)) || candidates[0];
+  const [candidate, setCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const skillData = [
-    { subject: 'Python', A: 95, B: 90, fullMark: 100 },
-    { subject: 'LLM/RAG', A: 90, B: 85, fullMark: 100 },
-    { subject: 'Cloud (AWS)', A: 80, B: 95, fullMark: 100 },
-    { subject: 'System Design', A: 85, B: 90, fullMark: 100 },
-    { subject: 'Leadership', A: 88, B: 75, fullMark: 100 },
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const profileData = await candidateService.getCandidateById(id);
+        setCandidate(profileData);
+      } catch (err) {
+        console.error('Failed to load candidate profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Retrieving candidate profile dossier...</p>
+      </div>
+    );
+  }
+
+  if (!candidate) {
+    return (
+      <div className="max-w-xl mx-auto mt-12 card-panel p-12 text-center text-textMuted flex flex-col items-center justify-center bg-white">
+        <User size={48} className="text-gray-300 mb-4" />
+        <h3 className="text-lg font-bold text-black mb-1">Candidate Profile Not Found</h3>
+        <p className="text-sm text-textMuted mb-6">The requested candidate profile ID does not exist or has been removed from the pipeline database.</p>
+        <button 
+          onClick={() => navigate('/rankings')}
+          className="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-primary-dark transition-colors shadow-sm"
+        >
+          Back to Rankings
+        </button>
+      </div>
+    );
+  }
+
+  const skillData = candidate.skillData || [
+    { subject: 'Python', A: 0, B: 90, fullMark: 100 },
+    { subject: 'LLM/RAG', A: 0, B: 85, fullMark: 100 },
+    { subject: 'Cloud (AWS)', A: 0, B: 95, fullMark: 100 },
+    { subject: 'System Design', A: 0, B: 90, fullMark: 100 },
+    { subject: 'Leadership', A: 0, B: 75, fullMark: 100 },
   ];
+
+  const timeline = candidate.experienceTimeline || [];
+  const learningVelocity = candidate.learningVelocity || { courses: 0, certifications: 0, newSkills: 0 };
+  const activitySignals = candidate.activitySignals || { oss: 'N/A', hackathons: 'N/A', publications: 'N/A' };
+  const stability = candidate.stability || { tenure: 'N/A', promoRate: 'N/A', consistency: 'N/A' };
+  const redFlags = candidate.redFlags || [];
+  const interviewQuestions = candidate.interviewQuestions || [];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -32,26 +81,26 @@ const CandidateProfile = () => {
         {/* Left Column: Summary & AI Score */}
         <div className="space-y-6">
           <div className="card-panel p-6 text-center">
-            <img src={candidate.avatar} alt="Profile" className="w-24 h-24 rounded-full border-4 border-gray-100 mx-auto mb-4 object-cover shadow-sm" />
+            <img src={candidate.avatar || 'https://i.pravatar.cc/150?u=fallback'} alt="Profile" className="w-24 h-24 rounded-full border-4 border-gray-100 mx-auto mb-4 object-cover shadow-sm" />
             <h2 className="text-xl font-bold text-black">{candidate.name}</h2>
             <p className="text-textMuted font-medium mb-4">{candidate.role}</p>
             
             <div className="grid grid-cols-2 gap-4 text-left text-sm mb-6">
               <div className="flex items-center gap-2">
                 <Briefcase size={16} className="text-primary" />
-                <span>{candidate.exp}</span>
+                <span>{candidate.exp || 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-primary" />
-                <span>{candidate.loc}</span>
+                <span>{candidate.loc || 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <DollarSign size={16} className="text-primary" />
-                <span>₹25LPA Exp.</span>
+                <span>{candidate.expectedSalary || 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-primary" />
-                <span>30 Days Notice</span>
+                <span>{candidate.noticePeriod || 'N/A'}</span>
               </div>
             </div>
 
@@ -101,11 +150,11 @@ const CandidateProfile = () => {
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 border-primary/30 relative z-10">
               <div className="absolute inset-0 rounded-full border-8 border-primary border-t-transparent border-l-transparent transform rotate-45"></div>
               <div className="text-center">
-                <span className="text-4xl font-bold text-white">{candidate.score}<span className="text-2xl text-white">%</span></span>
+                <span className="text-4xl font-bold text-white">{candidate.score || 0}<span className="text-2xl text-white">%</span></span>
               </div>
             </div>
             <p className="text-sm text-gray-300 mt-4 relative z-10">
-              Highly aligned with JD requirements. Exceptional fit for Senior AI role.
+              {candidate.score >= 90 ? 'Highly aligned with JD requirements. Exceptional fit for Senior AI role.' : 'Moderately matched. Focus on evaluating specific skill subsets.'}
             </p>
           </div>
         </div>
@@ -136,28 +185,29 @@ const CandidateProfile = () => {
 
           <div className="card-panel p-6">
             <h3 className="font-bold text-lg mb-6 text-black">Career Timeline</h3>
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
-              {[
-                { year: '2025', role: 'Lead AI Engineer', company: 'TechCorp', desc: 'Leading a team of 5, deployed RAG pipeline serving 1M requests/day.' },
-                { year: '2023', role: 'Senior AI Engineer', company: 'TechCorp', desc: 'Built internal LLM tools, improved search relevance by 40%.' },
-                { year: '2021', role: 'Software Engineer', company: 'StartupX', desc: 'Backend development using Python and AWS.' },
-                { year: '2020', role: 'Intern', company: 'DataSys', desc: 'Data cleaning and basic model training.' },
-              ].map((item, i) => (
-                <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-gray-100 bg-primary/10 text-primary shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
-                    <Briefcase size={16} />
-                  </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-gray-50 shadow-sm">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-bold text-black">{item.role}</h4>
-                      <span className="text-xs font-bold text-primary">{item.year}</span>
+            {timeline.length > 0 ? (
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
+                {timeline.map((item, i) => (
+                  <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-gray-100 bg-primary/10 text-primary shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
+                      <Briefcase size={16} />
                     </div>
-                    <p className="text-sm font-medium text-textMuted">{item.company}</p>
-                    <p className="text-sm text-textMuted mt-2">{item.desc}</p>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-gray-50 shadow-sm">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-bold text-black">{item.role}</h4>
+                        <span className="text-xs font-bold text-primary">{item.year}</span>
+                      </div>
+                      <p className="text-sm font-medium text-textMuted">{item.company}</p>
+                      <p className="text-sm text-textMuted mt-2">{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-textMuted text-xs font-medium border border-dashed border-border rounded-xl bg-gray-50">
+                No career timeline items recorded.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -166,33 +216,36 @@ const CandidateProfile = () => {
         <div className="card-panel p-5">
           <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-black"><BookOpen size={16} className="text-primary"/> Learning Velocity</h4>
           <ul className="text-sm space-y-2 text-textMuted">
-            <li className="flex justify-between"><span>Courses</span> <span className="font-bold text-black">12</span></li>
-            <li className="flex justify-between"><span>Certifications</span> <span className="font-bold text-black">4</span></li>
-            <li className="flex justify-between"><span>New Skills/Yr</span> <span className="font-bold text-black">3</span></li>
+            <li className="flex justify-between"><span>Courses</span> <span className="font-bold text-black">{learningVelocity.courses}</span></li>
+            <li className="flex justify-between"><span>Certifications</span> <span className="font-bold text-black">{learningVelocity.certifications}</span></li>
+            <li className="flex justify-between"><span>New Skills/Yr</span> <span className="font-bold text-black">{learningVelocity.newSkills}</span></li>
           </ul>
         </div>
         <div className="card-panel p-5">
           <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-black"><GitCommit size={16} className="text-primary"/> Activity Signals</h4>
           <ul className="text-sm space-y-2 text-textMuted">
-            <li className="flex justify-between"><span>OSS Contributions</span> <span className="font-bold text-black">High</span></li>
-            <li className="flex justify-between"><span>Hackathons</span> <span className="font-bold text-black">2 Wins</span></li>
-            <li className="flex justify-between"><span>Publications</span> <span className="font-bold text-black">1 Paper</span></li>
+            <li className="flex justify-between"><span>OSS Contributions</span> <span className="font-bold text-black">{activitySignals.oss}</span></li>
+            <li className="flex justify-between"><span>Hackathons</span> <span className="font-bold text-black">{activitySignals.hackathons}</span></li>
+            <li className="flex justify-between"><span>Publications</span> <span className="font-bold text-black">{activitySignals.publications}</span></li>
           </ul>
         </div>
         <div className="card-panel p-5">
           <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-black"><Target size={16} className="text-primary"/> Career Stability</h4>
           <ul className="text-sm space-y-2 text-textMuted">
-            <li className="flex justify-between"><span>Avg Tenure</span> <span className="font-bold text-black">2.5 Yrs</span></li>
-            <li className="flex justify-between"><span>Promotion Rate</span> <span className="font-bold text-black">Fast</span></li>
-            <li className="flex justify-between"><span>Role Consistency</span> <span className="font-bold text-black">High</span></li>
+            <li className="flex justify-between"><span>Avg Tenure</span> <span className="font-bold text-black">{stability.tenure}</span></li>
+            <li className="flex justify-between"><span>Promotion Rate</span> <span className="font-bold text-black">{stability.promoRate}</span></li>
+            <li className="flex justify-between"><span>Role Consistency</span> <span className="font-bold text-black">{stability.consistency}</span></li>
           </ul>
         </div>
         <div className="bg-red-50 p-5 rounded-2xl border border-red-200 shadow-sm">
           <h4 className="font-bold text-sm mb-3 flex items-center gap-2 text-red-600"><AlertTriangle size={16} /> Red Flags</h4>
-          <ul className="text-sm space-y-2 text-red-700 list-disc ml-4">
-            <li>Limited direct reports (max 5)</li>
-            <li>No experience with GCP</li>
-          </ul>
+          {redFlags.length > 0 ? (
+            <ul className="text-sm space-y-2 text-red-700 list-disc ml-4">
+              {redFlags.map((flag, idx) => <li key={idx}>{flag}</li>)}
+            </ul>
+          ) : (
+            <p className="text-xs text-green-700 font-medium">No red flags flagged by AI auditing model.</p>
+          )}
         </div>
       </div>
 
@@ -201,16 +254,18 @@ const CandidateProfile = () => {
           <MessageCircle size={18} className="text-primary" /> AI Generated Interview Questions
         </h3>
         <p className="text-sm text-textMuted mb-4">Based on candidate's weaknesses and JD requirements, ask these questions to validate their fit:</p>
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-50 rounded-xl border border-border">
-            <p className="font-medium text-black text-sm">1. "You have primarily used AWS. How would you approach architecting this solution if we had to migrate to GCP next year?"</p>
-            <p className="text-xs text-textMuted mt-2 mt-2"><span className="font-bold text-primary">Why:</span> Tests adaptability to new cloud environments (Identified weakness).</p>
+        {interviewQuestions.length > 0 ? (
+          <div className="space-y-4">
+            {interviewQuestions.map((q, idx) => (
+              <div key={idx} className="p-4 bg-gray-50 rounded-xl border border-border">
+                <p className="font-medium text-black text-sm">{idx + 1}. "{q.question}"</p>
+                <p className="text-xs text-textMuted mt-2"><span className="font-bold text-primary">Why:</span> {q.reason}</p>
+              </div>
+            ))}
           </div>
-          <div className="p-4 bg-gray-50 rounded-xl border border-border">
-            <p className="font-medium text-black text-sm">2. "Describe a time when your RAG pipeline failed in production under high load. How did you debug and fix it?"</p>
-            <p className="text-xs text-textMuted mt-2"><span className="font-bold text-primary">Why:</span> Validates "production AI systems" requirement from JD.</p>
-          </div>
-        </div>
+        ) : (
+          <p className="text-xs text-gray-400 italic">No custom interview questions generated.</p>
+        )}
       </div>
     </div>
   );
