@@ -8,7 +8,10 @@ const TalentGraph = () => {
   const [nodes, setNodes] = useState([]);
   const [links, setLinks] = useState([]);
 
+  const { candidates, loading: rankingLoading } = useRanking();
+
   useEffect(() => {
+<<<<<<< Updated upstream
     // Dynamically build graph based on top candidates
     const topCandidates = candidates.slice(0, 15);
     
@@ -54,6 +57,78 @@ const TalentGraph = () => {
         newLinks.push({ source: cId, target: sId });
       });
     });
+=======
+    if (rankingLoading || !candidates || candidates.length === 0) return;
+    
+    setLoading(true);
+    // Generate real graph data from candidates and skills
+    setTimeout(() => {
+      const topCandidates = candidates.slice(0, 15);
+      const newNodes = [];
+      const newLinks = [];
+      
+      // Central Job Node
+      newNodes.push({ id: 'job', label: 'Senior AI Engineer', type: 'job', size: 80, x: 400, y: 300, color: '#f59e0b' });
+      
+      // Gather common skills from top candidates
+      const skillFreq = {};
+      topCandidates.forEach(c => {
+        if(c.matchedSkills) {
+          c.matchedSkills.forEach(s => {
+             skillFreq[s] = (skillFreq[s] || 0) + 1;
+          });
+        }
+      });
+      const topSkills = Object.entries(skillFreq).sort((a,b) => b[1]-a[1]).slice(0, 6).map(x => x[0]);
+      
+      // Add Skill Nodes around the Job Node
+      topSkills.forEach((skill, i) => {
+        const angle = (i / topSkills.length) * Math.PI * 2;
+        const radius = 150;
+        newNodes.push({
+          id: `skill_${skill}`,
+          label: skill,
+          type: 'skill',
+          size: 60,
+          x: 400 + radius * Math.cos(angle) - 30,
+          y: 300 + radius * Math.sin(angle) - 30,
+          color: '#1f2937'
+        });
+        newLinks.push({ source: 'job', target: `skill_${skill}` });
+      });
+
+      // Add Candidate Nodes
+      topCandidates.forEach((c, i) => {
+        // Random placement around skills
+        const angle = (i / topCandidates.length) * Math.PI * 2;
+        const radius = 300;
+        newNodes.push({
+          id: c.id,
+          label: c.name,
+          type: 'candidate',
+          size: 50,
+          x: 400 + radius * Math.cos(angle) - 25,
+          y: 300 + radius * Math.sin(angle) - 25,
+          color: '#10b981'
+        });
+        
+        // Link candidate to job
+        newLinks.push({ source: c.id, target: 'job' });
+        
+        // Link candidate to skills they have
+        if (c.matchedSkills) {
+          c.matchedSkills.filter(s => topSkills.includes(s)).forEach(s => {
+            newLinks.push({ source: c.id, target: `skill_${s}` });
+          });
+        }
+      });
+      
+      setNodes(newNodes);
+      setLinks(newLinks);
+      setLoading(false);
+    }, 500); // Simulate processing delay
+  }, [candidates, rankingLoading]);
+>>>>>>> Stashed changes
 
     setNodes(newNodes);
     setLinks(newLinks);

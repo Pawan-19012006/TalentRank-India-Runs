@@ -2,6 +2,11 @@ import React, { useState, useRef } from 'react';
 import { Upload, FileText, Type, Sparkles, SlidersHorizontal, MapPin, Briefcase, DollarSign, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< Updated upstream
+=======
+import { searchService } from '../../services/searchService';
+import { useRanking } from '../../store/rankingStore';
+>>>>>>> Stashed changes
 
 const CreateSearch = () => {
   const navigate = useNavigate();
@@ -20,6 +25,12 @@ const CreateSearch = () => {
     level: 'Senior (5-8 yrs)'
   });
 
+<<<<<<< Updated upstream
+=======
+  const { setWeightVector } = useRanking();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+>>>>>>> Stashed changes
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -76,6 +87,37 @@ const CreateSearch = () => {
     projects: 15
   });
 
+<<<<<<< Updated upstream
+=======
+  const handleAnalyze = async () => {
+    setIsSubmitting(true);
+    const searchData = {
+      activeTab,
+      pastedJd,
+      uploadedFile: uploadedFile ? uploadedFile.name : null,
+      filters: {
+        experience: '5-8 Yrs',
+        location: 'Bangalore, Remote',
+        salary: '₹20LPA - ₹30LPA',
+        employmentType: 'Full-time'
+      },
+      weights
+    };
+
+    try {
+      setWeightVector(weights);
+      const search = await searchService.createSearch(searchData);
+      const searchId = search?.id || 'default_search';
+      navigate('/rankings', { state: { searchId } });
+    } catch (err) {
+      console.error('Failed to register search criteria:', err);
+      navigate('/rankings');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+>>>>>>> Stashed changes
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
@@ -258,26 +300,30 @@ const CreateSearch = () => {
             </div>
           </div>
 
-          <div className="card-panel p-6 bg-gray-900 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
-            <h2 className="text-lg font-bold mb-4 relative z-10 flex items-center gap-2">
-              <Sparkles size={18} className="text-primary" />
-              AI Analysis Preview
-            </h2>
-            <div className="space-y-3 text-sm relative z-10">
-              <div className="flex gap-2">
-                <span className="text-gray-400 w-24 shrink-0">Role:</span>
-                <span className="font-medium text-white">{analysisPreview.role}</span>
+          <div className="card-panel p-6 bg-primary/5 border border-primary/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-3xl rounded-full"></div>
+            <h3 className="font-bold mb-6 relative z-10 flex items-center gap-2 text-black">
+              <Sparkles className="text-primary" size={18} /> AI Analysis Preview
+            </h3>
+            
+            <div className="space-y-4 relative z-10">
+              <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
+                <span className="text-textMuted font-medium">Inferred Role</span>
+                <span className="font-medium text-black">{analysisPreview.role}</span>
               </div>
-              <div className="flex gap-2">
-                <span className="text-gray-400 w-24 shrink-0">Required:</span>
-                <span className="font-medium text-primary">{analysisPreview.required}</span>
+              <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
+                <span className="text-textMuted font-medium">Key Skills</span>
+                <span className="font-medium text-primary">{analysisPreview.skills} detected</span>
               </div>
-              <div className="flex gap-2">
-                <span className="text-gray-400 w-24 shrink-0">Level:</span>
-                <span className="font-medium text-white">{analysisPreview.level}</span>
+              <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
+                <span className="text-textMuted font-medium">Target Level</span>
+                <span className="font-medium text-black">{analysisPreview.level}</span>
               </div>
-              <div className="mt-4 pt-3 border-t border-gray-700 flex items-center gap-2">
+              <div className="flex justify-between items-center text-sm pb-2">
+                <span className="text-textMuted font-medium">AI Confidence</span>
+                <span className="font-medium text-green-500">{analysisPreview.confidence}</span>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/50 flex items-center gap-2">
                 <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded border border-primary/30 flex items-center gap-1 font-medium">
                   <Sparkles size={12} /> Hidden-Talent Matching: Enabled
                 </span>

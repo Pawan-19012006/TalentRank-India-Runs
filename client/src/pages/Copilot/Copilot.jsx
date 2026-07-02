@@ -84,14 +84,14 @@ const Copilot = () => {
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto border border-border rounded-2xl card-panel overflow-hidden">
-      <div className="bg-gray-900 text-white p-4 flex items-center gap-3 shrink-0 relative overflow-hidden">
+      <div className="bg-primary/5 border-b border-primary/20 p-4 flex items-center gap-3 shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary relative z-10">
           <Sparkles size={20} />
         </div>
         <div className="relative z-10">
-          <h2 className="font-bold text-white">Recruiter Copilot</h2>
-          <p className="text-xs text-gray-300">Natural Language Recruiting Assistant</p>
+          <h2 className="font-bold text-black">Recruiter Copilot</h2>
+          <p className="text-xs text-textMuted">Natural Language Recruiting Assistant</p>
         </div>
       </div>
 

@@ -1,18 +1,68 @@
+<<<<<<< Updated upstream
 import React from 'react';
 import { Search, Filter, Sparkles, TrendingUp, ChevronDown, Check, X, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BiasMirrorCard from '../../components/explainability/BiasMirrorCard';
 import { useRanking } from '../../store/rankingStore';
 import { candidates as defaultCandidates } from '../../data/mockData';
+=======
+import React, { useMemo, useState } from 'react';
+import { Search, Filter, Sparkles, TrendingUp, ChevronDown, Check, X, Eye, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import BiasMirrorCard from '../../components/explainability/BiasMirrorCard';
+import { useRanking } from '../../store/rankingStore';
+import { topAssessmentSkills, datasetStatistics } from '../../data/inventoryData';
+>>>>>>> Stashed changes
 
 const Rankings = () => {
   const navigate = useNavigate();
 
+<<<<<<< Updated upstream
   const { logAction, showOverlooked, candidates, addToCompare } = useRanking();
+=======
+  // Dynamic filter extraction
+  const { topLocs } = useMemo(() => {
+    if (!candidates || candidates.length === 0) return { topLocs: ['Bangalore', 'Remote'] };
+    const locs = {};
+    candidates.forEach(c => {
+      const l = c.loc || c.location || 'Unknown';
+      locs[l] = (locs[l] || 0) + 1;
+    });
+    return { topLocs: Object.entries(locs).sort((a,b) => b[1] - a[1]).slice(0, 2).map(x => x[0]) };
+  }, [candidates]);
 
-  const displayCandidates = showOverlooked 
-    ? candidates.filter(c => c.hidden_talent_score >= 70) 
-    : candidates;
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Scoring and ranking candidate pool...</p>
+      </div>
+    );
+  }
+>>>>>>> Stashed changes
+
+  const [aiFilters, setAiFilters] = useState({
+    skillDepth: 0,
+    careerStability: 0,
+    careerGrowth: 0
+  });
+
+  const displayCandidates = useMemo(() => {
+    let filtered = candidates;
+    if (showOverlooked) {
+      filtered = candidates.filter(c => c.score >= 70 && (c.derivedSignals?.skillDepth || 0) > 70);
+    }
+    
+    // Apply Advanced AI Filters
+    filtered = filtered.filter(c => {
+      const signals = c.derivedSignals || {};
+      return (signals.skillDepth || 0) >= aiFilters.skillDepth &&
+             (signals.careerStability || 0) >= aiFilters.careerStability &&
+             (signals.careerGrowth || 0) >= aiFilters.careerGrowth;
+    });
+    
+    return filtered.slice(0, 50); // Show top 50 to prevent huge DOM
+  }, [candidates, showOverlooked, aiFilters]);
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4">
@@ -21,7 +71,7 @@ const Rankings = () => {
           <h1 className="text-2xl font-bold text-black flex items-center gap-2">
             <Sparkles className="text-primary" /> AI Ranking Results
           </h1>
-          <p className="text-textMuted mt-1">Showing the top matched candidates for Senior AI Engineer.</p>
+          <p className="text-textMuted mt-1">Showing the top matched candidates out of {candidates.length} analyzed profiles.</p>
         </div>
       </div>
 
@@ -35,7 +85,7 @@ const Rankings = () => {
             <div>
               <h4 className="font-bold text-black mb-3 text-xs uppercase tracking-wider">Traditional</h4>
               <div className="space-y-2">
-                {['Skills Match > 90%', 'Location: Bangalore', 'Exp: 5-8 Yrs', 'Education: Masters'].map((f, i) => (
+                {[`Top Skill: ${topAssessmentSkills[0]?.skill || 'Python'}`, `Location: ${topLocs[0]}`, 'Exp: 5-8 Yrs', 'Education: Verified'].map((f, i) => (
                   <label key={i} className="flex items-center gap-2 text-textMuted cursor-pointer hover:text-black">
                     <input type="checkbox" className="rounded border-border bg-white text-primary focus:ring-primary accent-primary" defaultChecked={i < 2} />
                     {f}
@@ -52,10 +102,9 @@ const Rankings = () => {
               </h4>
               <div className="space-y-3">
                 {[
-                  { label: 'Career Growth', val: 80 },
-                  { label: 'Leadership Score', val: 70 },
-                  { label: 'Learning Velocity', val: 90 },
-                  { label: 'Startup Fit', val: 0 },
+                  { key: 'skillDepth', label: 'Skill Depth', val: aiFilters.skillDepth },
+                  { key: 'careerStability', label: 'Career Stability', val: aiFilters.careerStability },
+                  { key: 'careerGrowth', label: 'Learning Velocity', val: aiFilters.careerGrowth }
                 ].map((f, i) => (
                   <div key={i}>
                     <div className="flex justify-between text-xs mb-1">
@@ -63,9 +112,18 @@ const Rankings = () => {
                       {f.val > 0 && <span className="text-primary font-bold">{f.val}+</span>}
                     </div>
                     {f.val > 0 ? (
-                      <input type="range" className="w-full h-1 bg-gray-200 accent-primary rounded-lg appearance-none cursor-pointer" defaultValue={f.val} />
+                      <input 
+                        type="range" 
+                        min="0" max="100" 
+                        value={f.val} 
+                        onChange={(e) => setAiFilters({...aiFilters, [f.key]: parseInt(e.target.value)})}
+                        className="w-full h-1 bg-gray-200 accent-primary rounded-lg appearance-none cursor-pointer" 
+                      />
                     ) : (
-                      <button className="text-xs text-textMuted bg-gray-50 border border-border px-2 py-1 rounded w-full text-left flex justify-between items-center hover:bg-gray-100 transition-colors">
+                      <button 
+                        onClick={() => setAiFilters({...aiFilters, [f.key]: 50})}
+                        className="text-xs text-textMuted bg-gray-50 border border-border px-2 py-1 rounded w-full text-left flex justify-between items-center hover:bg-gray-100 transition-colors"
+                      >
                         Any <ChevronDown size={12} />
                       </button>
                     )}
@@ -186,19 +244,25 @@ const Rankings = () => {
 
         {/* Right AI Panel */}
         <div className="w-64 space-y-4 shrink-0">
+<<<<<<< Updated upstream
           <div className="card-panel bg-gray-900 text-white p-5 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
             <h3 className="font-bold mb-3 flex items-center gap-2 relative z-10 text-white">
+=======
+          <div className="card-panel bg-primary/5 border border-primary/20 p-5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
+            <h3 className="font-bold mb-3 flex items-center gap-2 relative z-10 text-black">
+>>>>>>> Stashed changes
               <TrendingUp size={16} className="text-primary" /> Market Insights
             </h3>
             <div className="space-y-3 text-sm relative z-10">
-              <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+              <div className="bg-white p-3 rounded-lg border border-border">
                 <p className="text-primary font-bold text-lg mb-1">8%</p>
-                <p className="text-gray-300 text-xs">Only 8% candidates have this specific skillset combination.</p>
+                <p className="text-textMuted text-xs">Only 8% candidates have this specific skillset combination.</p>
               </div>
-              <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+              <div className="bg-white p-3 rounded-lg border border-border">
                 <p className="text-primary font-bold text-lg mb-1">₹18 LPA</p>
-                <p className="text-gray-300 text-xs">Average market salary for similar profiles.</p>
+                <p className="text-textMuted text-xs">Average market salary for similar profiles.</p>
               </div>
             </div>
           </div>

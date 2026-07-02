@@ -12,11 +12,25 @@ const CompareCandidates = () => {
 
   const features = [
     { key: 'Match Score', getValue: (c) => <span className="font-bold text-primary text-lg">{c.score}%</span> },
-    { key: 'Core Skills Match', getValue: (c) => <Check className="text-green-500 mx-auto" size={20} /> },
-    { key: 'Leadership Score', getValue: (c) => <span className="font-medium">{c.behavior}/100</span> },
-    { key: 'Hidden Talent', getValue: (c) => <span className="font-medium text-primary">{c.hidden_talent_score}%</span> },
-    { key: 'Experience Match', getValue: (c) => <span className="font-medium">{c.experience}%</span> },
-    { key: 'Location', getValue: (c) => c.loc },
+    { key: 'Core Skills Match', getValue: (c) => (
+      <div className="flex flex-wrap justify-center gap-1">
+        {c.matchedSkills?.slice(0, 3).map((s, i) => (
+          <span key={i} className="bg-green-50 text-green-700 text-[10px] px-2 py-0.5 rounded border border-green-200">{s}</span>
+        ))}
+      </div>
+    )},
+    { key: 'Key Strengths', getValue: (c) => (
+      <ul className="text-xs text-left list-disc pl-4 space-y-1 text-black">
+        {c.keyStrengths?.slice(0, 2).map((s, i) => <li key={i}>{s}</li>) || <li>No distinct strengths</li>}
+      </ul>
+    )},
+    { key: 'Potential Gaps', getValue: (c) => (
+      <ul className="text-xs text-left list-disc pl-4 space-y-1 text-red-700">
+        {c.potentialGaps?.slice(0, 2).map((s, i) => <li key={i}>{s}</li>) || <li className="text-green-700">None</li>}
+      </ul>
+    )},
+    { key: 'Experience Match', getValue: (c) => <span className="font-medium text-black">{c.relevantExperience || `${c.yearsOfExperience} Yrs`}</span> },
+    { key: 'Location', getValue: (c) => <span className="font-medium text-black">{c.loc || c.location || 'Remote'}</span> },
   ];
 
   return (
@@ -74,16 +88,16 @@ const CompareCandidates = () => {
             </div>
           </div>
 
-          <div className="card-panel bg-gray-900 text-white p-6 relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
+          <div className="card-panel bg-primary/5 border border-primary/20 p-6 relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-3xl rounded-full"></div>
             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 relative z-10">
               <Trophy size={32} />
             </div>
             <div className="flex-1 relative z-10">
-              <h3 className="text-xl font-bold flex items-center gap-2 mb-2 text-white">
+              <h3 className="text-xl font-bold flex items-center gap-2 mb-2 text-black">
                 <Sparkles className="text-primary" size={20} /> AI Verdict: Recommend {candidates.reduce((prev, current) => (prev.score > current.score) ? prev : current).name}
               </h3>
-              <p className="text-gray-300 text-sm">
+              <p className="text-textMuted text-sm">
                 This candidate has the highest overall match score and strongly aligns with the core requirements. They are the optimal choice based on your current search configuration.
               </p>
             </div>

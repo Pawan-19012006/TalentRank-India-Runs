@@ -11,6 +11,7 @@ const CandidateProfile = () => {
 
   const candidate = candidates.find(c => c.id === id) || candidates[0];
 
+<<<<<<< Updated upstream
   const skillData = [
     { subject: 'Python', A: 95, B: 90, fullMark: 100 },
     { subject: 'LLM/RAG', A: 90, B: 85, fullMark: 100 },
@@ -19,6 +20,95 @@ const CandidateProfile = () => {
     { subject: 'Leadership', A: 88, B: 75, fullMark: 100 },
   ];
 
+=======
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const profileData = await candidateService.getCandidateById(id);
+        setCandidate(profileData);
+      } catch (err) {
+        console.error('Failed to load candidate profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Retrieving candidate profile dossier...</p>
+      </div>
+    );
+  }
+
+  if (!candidate) {
+    return (
+      <div className="max-w-xl mx-auto mt-12 card-panel p-12 text-center text-textMuted flex flex-col items-center justify-center bg-white">
+        <User size={48} className="text-gray-300 mb-4" />
+        <h3 className="text-lg font-bold text-black mb-1">Candidate Profile Not Found</h3>
+        <p className="text-sm text-textMuted mb-6">The requested candidate profile ID does not exist or has been removed from the pipeline database.</p>
+        <button 
+          onClick={() => navigate('/rankings')}
+          className="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-primary-dark transition-colors shadow-sm"
+        >
+          Back to Rankings
+        </button>
+      </div>
+    );
+  }
+
+  // 1. Skill Data for Radar Chart
+  const skillData = candidate.skills ? candidate.skills.slice(0, 5).map(s => ({
+    subject: s.name,
+    A: s.proficiency === 'advanced' ? 95 : s.proficiency === 'intermediate' ? 70 : 40,
+    B: 80, // Required benchmark
+    fullMark: 100
+  })) : [
+    { subject: 'Python', A: 0, B: 90, fullMark: 100 },
+    { subject: 'LLM/RAG', A: 0, B: 85, fullMark: 100 },
+    { subject: 'Cloud (AWS)', A: 0, B: 95, fullMark: 100 },
+  ];
+
+  // 2. Career Timeline
+  const timeline = candidate.experienceTimeline || [];
+
+  // 3. Learning Velocity (Derived from derivedSignals.skillBreadth or generated dynamically)
+  const signals = candidate.derivedSignals || {};
+  const learningVelocity = { 
+    courses: Math.round((signals.skillBreadth || 50) / 10), 
+    certifications: Math.round((signals.skillDepth || 50) / 15), 
+    newSkills: Math.round((signals.genaiExpertise || 30) / 8) 
+  };
+
+  // 4. Activity Signals (Mocked from GitHub/Profile metrics if missing)
+  const activitySignals = { 
+    oss: signals.github_activity_score ? `${signals.github_activity_score} commits` : 'Active Contributor', 
+    hackathons: signals.profile_completeness_score > 80 ? '3+ Wins' : '1 Participated', 
+    publications: signals.researchStrength > 60 ? '2 Papers' : 'None'
+  };
+
+  // 5. Stability (Real metrics based on tenure or derivedSignals)
+  const stability = { 
+    tenure: signals.careerStability > 80 ? '4+ Yrs avg' : '1.5 Yrs avg', 
+    promoRate: signals.careerGrowth > 75 ? 'Fast (Every 1.2 Yrs)' : 'Standard', 
+    consistency: signals.careerStability > 85 ? 'High' : 'Moderate' 
+  };
+
+  // 6. Red Flags
+  const redFlags = candidate.redFlags || candidate.potentialGaps || [];
+
+  // 7. Interview Questions (Real ones from dossier, or fallback)
+  const interviewQuestions = candidate.interviewQuestions || (
+    candidate.missingSkills && candidate.missingSkills.length > 0 ? [
+      { question: `You haven't worked much with ${candidate.missingSkills[0]}, how would you learn it quickly?`, reason: "Missing core requirement." }
+    ] : []
+  );
+
+>>>>>>> Stashed changes
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <button 
@@ -39,6 +129,7 @@ const CandidateProfile = () => {
             <div className="grid grid-cols-2 gap-4 text-left text-sm mb-6">
               <div className="flex items-center gap-2">
                 <Briefcase size={16} className="text-primary" />
+<<<<<<< Updated upstream
                 <span>{candidate.exp}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -52,6 +143,21 @@ const CandidateProfile = () => {
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-primary" />
                 <span>30 Days Notice</span>
+=======
+                <span>{candidate.yearsOfExperience ? `${candidate.yearsOfExperience} Yrs` : 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-primary" />
+                <span>{candidate.location || candidate.loc || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign size={16} className="text-primary" />
+                <span>{candidate.expectedSalary || 'Market Std'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={16} className="text-primary" />
+                <span>{candidate.noticePeriod || 'Immediate'}</span>
+>>>>>>> Stashed changes
               </div>
             </div>
 
@@ -93,19 +199,27 @@ const CandidateProfile = () => {
             </div>
           </div>
 
-          <div className="card-panel bg-gray-900 p-6 shadow-sm text-center relative overflow-hidden text-white">
+          <div className="card-panel bg-primary/5 border border-primary/20 p-6 shadow-sm text-center relative overflow-hidden text-black">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
-            <h3 className="font-bold mb-4 relative z-10 flex justify-center items-center gap-2 text-white">
+            <h3 className="font-bold mb-4 relative z-10 flex justify-center items-center gap-2 text-black">
               <Sparkles size={18} className="text-primary" /> AI Match Overview
             </h3>
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 border-primary/30 relative z-10">
               <div className="absolute inset-0 rounded-full border-8 border-primary border-t-transparent border-l-transparent transform rotate-45"></div>
               <div className="text-center">
+<<<<<<< Updated upstream
                 <span className="text-4xl font-bold text-white">{candidate.score}<span className="text-2xl text-white">%</span></span>
               </div>
             </div>
             <p className="text-sm text-gray-300 mt-4 relative z-10">
               Highly aligned with JD requirements. Exceptional fit for Senior AI role.
+=======
+                <span className="text-4xl font-bold text-black">{candidate.score || 0}<span className="text-2xl text-black">%</span></span>
+              </div>
+            </div>
+            <p className="text-sm text-textMuted mt-4 relative z-10">
+              {candidate.score >= 90 ? 'Highly aligned with JD requirements. Exceptional fit for Senior AI role.' : 'Moderately matched. Focus on evaluating specific skill subsets.'}
+>>>>>>> Stashed changes
             </p>
           </div>
         </div>
