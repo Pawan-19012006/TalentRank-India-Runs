@@ -1,13 +1,3 @@
-<<<<<<< Updated upstream
-import React from 'react';
-import { Users, Briefcase, Bookmark, Activity, ChevronDown, MoreVertical, Sparkles, User, TrendingUp, ShieldAlert, ArrowRight, Lightbulb, BarChart as BarChartIcon } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter, CartesianGrid, ZAxis } from 'recharts';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { useRanking } from '../../store/rankingStore';
-
-
-=======
 import React, { useState, useEffect, useMemo } from 'react';
 import { Users, Briefcase, Bookmark, Activity, ChevronDown, MoreVertical, Sparkles, User, TrendingUp, ShieldAlert, ArrowRight, Lightbulb, BarChart as BarChartIcon, Database } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
@@ -15,7 +5,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useRanking } from '../../store/rankingStore';
 import { datasetStatistics, assessmentInventory, skillInventory, skillCategories, getCategoryBreakdown, aiMlSkills } from '../../data/inventoryData';
->>>>>>> Stashed changes
 
 const StatCard = ({ title, value, icon: Icon, trend, trendUp, iconColor, iconBg, delay }) => (
   <motion.div 
@@ -43,89 +32,6 @@ const StatCard = ({ title, value, icon: Icon, trend, trendUp, iconColor, iconBg,
 
 const Dashboard = () => {
   const navigate = useNavigate();
-<<<<<<< Updated upstream
-  const { candidates, shortlistColumns } = useRanking();
-  
-  const totalCandidates = candidates.length;
-  const shortlistedCount = shortlistColumns.find(c => c.id === 'shortlisted')?.cards.length || 0;
-  const avgMatchScore = Math.round(candidates.reduce((acc, curr) => acc + curr.score, 0) / (totalCandidates || 1));
-
-  const flowData = React.useMemo(() => {
-    const counts = {};
-    candidates.forEach(c => {
-      const dateStr = c._raw?.redrob_signals?.signup_date;
-      if (dateStr) {
-        const month = dateStr.substring(0, 7); // YYYY-MM
-        counts[month] = (counts[month] || 0) + 1;
-      }
-    });
-    const sortedDates = Object.keys(counts).sort().slice(-6);
-    if (sortedDates.length === 0) return [{ name: 'N/A', value: 0 }];
-    return sortedDates.map(date => ({ name: date, value: counts[date] }));
-  }, [candidates]);
-
-  const sourceData = React.useMemo(() => {
-    const counts = {};
-    candidates.forEach(c => {
-      const loc = c._raw?.profile?.country || 'Unknown';
-      counts[loc] = (counts[loc] || 0) + 1;
-    });
-    const colors = ['#0f172a', '#22c55e', '#f59e0b', '#8b5cf6', '#f43f5e'];
-    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-    const top = sorted.slice(0, 4);
-    const others = sorted.slice(4).reduce((sum, item) => sum + item[1], 0);
-    if (others > 0) top.push(['Others', others]);
-    
-    return top.map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }));
-  }, [candidates]);
-
-  const scatterData = React.useMemo(() => {
-    // Sample top 100 to avoid clutter
-    return candidates.slice(0, 100).map(c => ({
-      x: c.experience || parseInt(c.exp) || 0,
-      y: c.score,
-      z: 100,
-      name: c.name
-    }));
-  }, [candidates]);
-
-
-  const activePipelines = React.useMemo(() => {
-    const roles = {};
-    candidates.forEach(c => {
-      const role = c._raw?.profile?.current_title || 'Software Engineer';
-      if (!roles[role]) roles[role] = { count: 0, scoreSum: 0, highestScore: 0 };
-      roles[role].count += 1;
-      roles[role].scoreSum += c.score;
-      if (c.score > roles[role].highestScore) roles[role].highestScore = c.score;
-    });
-
-    const colors = [
-      'bg-green-100 text-green-600',
-      'bg-orange-100 text-orange-500',
-      'bg-purple-100 text-purple-600',
-      'bg-indigo-100 text-indigo-600'
-    ];
-
-    return Object.entries(roles)
-      .sort((a,b) => b[1].count - a[1].count)
-      .slice(0, 4)
-      .map(([role, data], i) => {
-        const words = role.split(' ');
-        const init = words.length > 1 ? words[0][0] + words[1][0] : role.substring(0, 2);
-        return {
-          role,
-          date: 'Active now',
-          candidates: data.count,
-          status: 'Active',
-          match: data.highestScore,
-          init: init.toUpperCase(),
-          bg: colors[i % colors.length]
-        };
-      });
-  }, [candidates]);
-
-=======
   const { candidates, loading, shortlistColumns } = useRanking();
 
   // ─── Compute all analytics from candidates + inventory data ─────
@@ -229,7 +135,6 @@ const Dashboard = () => {
       </div>
     );
   }
->>>>>>> Stashed changes
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-8">
@@ -242,13 +147,8 @@ const Dashboard = () => {
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<<<<<<< Updated upstream
-        <StatCard title="Total Candidates" value={totalCandidates} icon={Users} trend="↑ 14%" trendUp={true} iconBg="bg-green-100" iconColor="text-green-600" delay={0.1} />
-        <StatCard title="Active Searches" value="1" icon={Briefcase} trend="↑ 2" trendUp={true} iconBg="bg-orange-100" iconColor="text-orange-500" delay={0.2} />
-=======
         <StatCard title="Ranked Candidates" value={totalCandidates.toLocaleString()} icon={Users} trend={`of ${datasetStatistics.candidate_count.toLocaleString()} total`} trendUp={true} iconBg="bg-green-100" iconColor="text-green-600" delay={0.1} />
         <StatCard title="Skill Records" value={datasetStatistics.total_skill_records.toLocaleString()} icon={Database} trend={`${Math.round(datasetStatistics.total_skill_records / datasetStatistics.candidate_count)} avg per candidate`} trendUp={true} iconBg="bg-orange-100" iconColor="text-orange-500" delay={0.2} />
->>>>>>> Stashed changes
         <StatCard title="Shortlisted" value={shortlistedCount} icon={Bookmark} trend="↑ 24%" trendUp={true} iconBg="bg-purple-100" iconColor="text-purple-600" delay={0.3} />
         <StatCard title="Avg Match Score" value={`${avgMatchScore}%`} trend="↑ 3%" icon={Activity} trendUp={true} iconBg="bg-red-100" iconColor="text-red-500" delay={0.4} />
       </div>
@@ -263,59 +163,6 @@ const Dashboard = () => {
             transition={{ delay: 0.5 }}
             className="card-panel overflow-hidden flex flex-col"
           >
-<<<<<<< Updated upstream
-          <div className="p-6 border-b border-border flex justify-between items-center bg-white">
-            <h2 className="font-bold text-lg text-black flex items-center gap-2">
-              <Activity size={20} className="text-primary" /> Active Pipelines
-            </h2>
-            <button className="text-primary text-sm font-bold hover:text-primary-dark transition-colors flex items-center gap-1">
-              View all pipelines <ArrowRight size={14} />
-            </button>
-          </div>
-          
-          <div className="px-6 py-3 border-b border-border bg-gray-50 flex items-center justify-between text-xs font-bold text-textMuted uppercase tracking-wider">
-            <div className="w-1/2">Pipeline</div>
-            <div className="w-1/6 text-center">Matched</div>
-            <div className="w-1/6 text-center">Top Score</div>
-            <div className="w-1/6 text-center">Status</div>
-            <div className="w-1/6 text-right">Updated</div>
-          </div>
-
-          <div className="divide-y divide-border flex-1 bg-white">
-            {activePipelines.map((search, i) => (
-              <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group">
-                <div className="flex items-center gap-4 w-1/2">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${search.bg}`}>
-                    {search.init}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-black text-sm">{search.role}</h4>
-                    <p className="text-xs text-textMuted mt-0.5">Started {search.date}</p>
-                  </div>
-                </div>
-                
-                <div className="w-1/6 text-center font-medium text-sm text-black">{search.candidates}</div>
-                
-                <div className="w-1/6 text-center font-bold text-sm" style={{ color: search.match >= 90 ? '#16a34a' : search.match >= 85 ? '#f59e0b' : search.match >= 80 ? '#0ea5e9' : '#e11d48' }}>
-                  {search.match}%
-                </div>
-                
-                <div className="w-1/6 text-center">
-                  <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-600 border border-green-200">
-                    {search.status}
-                  </span>
-                </div>
-                
-                <div className="w-1/6 text-right flex items-center justify-end gap-2 text-xs text-textMuted">
-                  {search.date}
-                  <button className="text-gray-400 hover:text-black">
-                    <MoreVertical size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-=======
             <div className="p-6 border-b border-border flex justify-between items-center bg-white">
               <h2 className="font-bold text-lg text-black flex items-center gap-2">
                 <Activity size={20} className="text-primary" /> Active Pipelines
@@ -358,7 +205,6 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
->>>>>>> Stashed changes
           </motion.div>
 
           {/* Match Score Distribution */}
@@ -379,16 +225,6 @@ const Dashboard = () => {
             
             <div className="p-6 h-64 bg-white">
               <ResponsiveContainer width="100%" height="100%">
-<<<<<<< Updated upstream
-                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis type="number" dataKey="x" name="Experience Score" domain={['dataMin', 'dataMax']} tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} />
-                  <YAxis type="number" dataKey="y" name="Match Score" domain={[50, 100]} />
-                  <ZAxis type="number" dataKey="z" range={[50, 400]} name="Candidates" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ color: '#111827' }} />
-                  <Scatter name="Candidates" data={scatterData} fill="#10b981" />
-                </ScatterChart>
-=======
                 <BarChart data={scoreDistribution} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                   <XAxis dataKey="range" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />
@@ -396,7 +232,6 @@ const Dashboard = () => {
                   <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ color: '#111827' }} />
                   <Bar dataKey="count" name="Candidates" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
                 </BarChart>
->>>>>>> Stashed changes
               </ResponsiveContainer>
             </div>
           </motion.div>
@@ -431,15 +266,10 @@ const Dashboard = () => {
                   <User size={16} />
                 </div>
                 <div>
-<<<<<<< Updated upstream
-                  <h4 className="font-bold text-sm text-black mb-1">Top Talent Alert</h4>
-                  <p className="text-xs text-textMuted leading-relaxed">3 highly-matched candidates for <b>AI Engineer</b> just became available in your location.</p>
-=======
                   <h4 className="font-bold text-sm text-black mb-1">Dataset Scale</h4>
                   <p className="text-xs text-textMuted leading-relaxed">
                     Analyzing <b>{datasetStatistics.candidate_count.toLocaleString()}</b> candidates with <b>{datasetStatistics.total_skill_records.toLocaleString()}</b> skill records and <b>{datasetStatistics.total_career_records.toLocaleString()}</b> career entries.
                   </p>
->>>>>>> Stashed changes
                 </div>
               </div>
             </div>
@@ -453,13 +283,8 @@ const Dashboard = () => {
                   <TrendingUp size={16} />
                 </div>
                 <div>
-<<<<<<< Updated upstream
-                  <h4 className="font-bold text-sm text-black mb-1">Skill Trend Update</h4>
-                  <p className="text-xs text-textMuted leading-relaxed"><b>Graph Neural Networks</b> is a fast-rising skill in your pipeline.</p>
-=======
                   <h4 className="font-bold text-sm text-black mb-1">Top Assessment Skill</h4>
                   <p className="text-xs text-textMuted leading-relaxed"><b>{assessmentInventory[0]?.skill}</b> is the most assessed skill with {assessmentInventory[0]?.count.toLocaleString()} candidate assessments.</p>
->>>>>>> Stashed changes
                 </div>
               </div>
             </div>
@@ -473,13 +298,8 @@ const Dashboard = () => {
                   <Lightbulb size={16} />
                 </div>
                 <div>
-<<<<<<< Updated upstream
-                  <h4 className="font-bold text-sm text-black mb-1">Search Optimization</h4>
-                  <p className="text-xs text-textMuted leading-relaxed mb-2">Consider adding 2 more skills to improve candidate match rate.</p>
-=======
                   <h4 className="font-bold text-sm text-black mb-1">Education Records</h4>
                   <p className="text-xs text-textMuted leading-relaxed"><b>{datasetStatistics.total_education_records.toLocaleString()}</b> education records analyzed for credential scoring.</p>
->>>>>>> Stashed changes
                 </div>
               </div>
             </div>
@@ -491,27 +311,16 @@ const Dashboard = () => {
                     <TrendingUp size={16} className="text-primary" /> Inventory Summary
                   </h4>
                   <p className="text-xs text-textMuted leading-relaxed">
-<<<<<<< Updated upstream
-                    You've added 12 candidates and closed 2 searches this week.
-=======
                     {skillInventory.length} unique skills tracked. {assessmentInventory.length} assessment categories. {totalCandidates.toLocaleString()} candidates currently ranked and scored.
->>>>>>> Stashed changes
                   </p>
                 </div>
                 <div className="relative w-16 h-16 shrink-0 flex flex-col items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90 absolute top-0 left-0">
                     <circle cx="32" cy="32" r="28" fill="none" stroke="#f3f4f6" strokeWidth="6" />
-<<<<<<< Updated upstream
-                    <circle cx="32" cy="32" r="28" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="175.9" strokeDashoffset="43.9" strokeLinecap="round" />
-                  </svg>
-                  <span className="text-sm font-bold text-black relative z-10">75%</span>
-                  <span className="text-[8px] text-textMuted absolute -bottom-3 text-center whitespace-nowrap">Goal Progress</span>
-=======
                     <circle cx="32" cy="32" r="28" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="175.9" strokeDashoffset={175.9 - (175.9 * avgMatchScore / 100)} strokeLinecap="round" />
                   </svg>
                   <span className="text-sm font-bold text-black relative z-10">{avgMatchScore}%</span>
                   <span className="text-[8px] text-textMuted absolute -bottom-3 text-center whitespace-nowrap">Avg Score</span>
->>>>>>> Stashed changes
                 </div>
               </div>
             </div>
@@ -532,25 +341,6 @@ const Dashboard = () => {
             <h2 className="font-bold text-lg text-black">Skill Landscape</h2>
             <span className="text-xs text-textMuted font-medium">{skillInventory.length} skills tracked</span>
           </div>
-<<<<<<< Updated upstream
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={flowData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#111827', fontWeight: 'bold' }}
-                />
-                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-=======
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius="65%" data={categoryRadar}>
@@ -560,7 +350,6 @@ const Dashboard = () => {
                 <Radar name="Avg Candidates" dataKey="avgCandidates" stroke="#10b981" fill="#10b981" fillOpacity={0.25} strokeWidth={2} />
                 <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} itemStyle={{ color: '#111827' }} />
               </RadarChart>
->>>>>>> Stashed changes
             </ResponsiveContainer>
           </div>
         </motion.div>
@@ -605,24 +394,14 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-<<<<<<< Updated upstream
-                    data={sourceData}
-                    innerRadius={60}
-                    outerRadius={85}
-=======
                     data={locationData}
                     innerRadius={50}
                     outerRadius={75}
->>>>>>> Stashed changes
                     paddingAngle={2}
                     dataKey="value"
                     stroke="none"
                   >
-<<<<<<< Updated upstream
-                    {sourceData.map((entry, index) => (
-=======
                     {locationData.map((entry, index) => (
->>>>>>> Stashed changes
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -633,16 +412,6 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-<<<<<<< Updated upstream
-            <div className="w-[45%] flex flex-col justify-center gap-4">
-              {sourceData.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
-                    <span className="text-textMuted font-medium">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-black">{item.value}%</span>
-=======
             <div className="w-[45%] flex flex-col justify-center gap-3">
               {locationData.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between text-sm">
@@ -651,7 +420,6 @@ const Dashboard = () => {
                     <span className="text-textMuted font-medium text-xs">{item.name}</span>
                   </div>
                   <span className="font-bold text-black text-xs">{item.value}</span>
->>>>>>> Stashed changes
                 </div>
               ))}
             </div>

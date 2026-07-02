@@ -1,25 +1,13 @@
-<<<<<<< Updated upstream
-import React from 'react';
-import { Search, Filter, Sparkles, TrendingUp, ChevronDown, Check, X, Eye } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import BiasMirrorCard from '../../components/explainability/BiasMirrorCard';
-import { useRanking } from '../../store/rankingStore';
-import { candidates as defaultCandidates } from '../../data/mockData';
-=======
 import React, { useMemo, useState } from 'react';
 import { Search, Filter, Sparkles, TrendingUp, ChevronDown, Check, X, Eye, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BiasMirrorCard from '../../components/explainability/BiasMirrorCard';
 import { useRanking } from '../../store/rankingStore';
 import { topAssessmentSkills, datasetStatistics } from '../../data/inventoryData';
->>>>>>> Stashed changes
 
 const Rankings = () => {
   const navigate = useNavigate();
 
-<<<<<<< Updated upstream
-  const { logAction, showOverlooked, candidates, addToCompare } = useRanking();
-=======
   // Dynamic filter extraction
   const { topLocs } = useMemo(() => {
     if (!candidates || candidates.length === 0) return { topLocs: ['Bangalore', 'Remote'] };
@@ -39,7 +27,6 @@ const Rankings = () => {
       </div>
     );
   }
->>>>>>> Stashed changes
 
   const [aiFilters, setAiFilters] = useState({
     skillDepth: 0,
@@ -244,15 +231,9 @@ const Rankings = () => {
 
         {/* Right AI Panel */}
         <div className="w-64 space-y-4 shrink-0">
-<<<<<<< Updated upstream
-          <div className="card-panel bg-gray-900 text-white p-5 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
-            <h3 className="font-bold mb-3 flex items-center gap-2 relative z-10 text-white">
-=======
           <div className="card-panel bg-primary/5 border border-primary/20 p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
             <h3 className="font-bold mb-3 flex items-center gap-2 relative z-10 text-black">
->>>>>>> Stashed changes
               <TrendingUp size={16} className="text-primary" /> Market Insights
             </h3>
             <div className="space-y-3 text-sm relative z-10">

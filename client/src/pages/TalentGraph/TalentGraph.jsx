@@ -4,63 +4,14 @@ import { motion } from 'framer-motion';
 import { useRanking } from '../../store/rankingStore';
 
 const TalentGraph = () => {
-  const { candidates } = useRanking();
   const [nodes, setNodes] = useState([]);
   const [links, setLinks] = useState([]);
 
   const { candidates, loading: rankingLoading } = useRanking();
 
   useEffect(() => {
-<<<<<<< Updated upstream
-    // Dynamically build graph based on top candidates
-    const topCandidates = candidates.slice(0, 15);
-    
-    let newNodes = [];
-    let newLinks = [];
-    
-    // Central Node (The Job)
-    newNodes.push({ id: 'job', label: 'Ideal Candidate', type: 'job', x: 400, y: 300, size: 80, color: '#f59e0b' });
-    
-    // Candidate Nodes & Links
-    topCandidates.forEach((c, index) => {
-      const cId = `c_${c.id}`;
-      // Calculate positions in a rough circle around the center
-      const angle = (index / topCandidates.length) * Math.PI * 2;
-      const radius = 220;
-      newNodes.push({ 
-        id: cId, 
-        label: c.name, 
-        type: 'candidate', 
-        x: 400 + Math.cos(angle) * radius, 
-        y: 300 + Math.sin(angle) * radius, 
-        size: 55, 
-        color: '#0ea5e9' 
-      });
-      
-      newLinks.push({ source: 'job', target: cId });
-      
-      // Skills Nodes
-      const skills = (c._raw?.skills || []).slice(0, 2).map(s => s.name);
-      skills.forEach((skill, sIdx) => {
-        const sId = `s_${skill}`;
-        if (!newNodes.find(n => n.id === sId)) {
-           newNodes.push({
-             id: sId,
-             label: skill,
-             type: 'skill',
-             x: (400 + Math.cos(angle) * radius) + (Math.cos(sIdx * Math.PI) * 80),
-             y: (300 + Math.sin(angle) * radius) + (Math.sin(sIdx * Math.PI) * 80),
-             size: 40,
-             color: '#18181b'
-           });
-        }
-        newLinks.push({ source: cId, target: sId });
-      });
-    });
-=======
     if (rankingLoading || !candidates || candidates.length === 0) return;
     
-    setLoading(true);
     // Generate real graph data from candidates and skills
     setTimeout(() => {
       const topCandidates = candidates.slice(0, 15);
@@ -125,14 +76,8 @@ const TalentGraph = () => {
       
       setNodes(newNodes);
       setLinks(newLinks);
-      setLoading(false);
     }, 500); // Simulate processing delay
   }, [candidates, rankingLoading]);
->>>>>>> Stashed changes
-
-    setNodes(newNodes);
-    setLinks(newLinks);
-  }, [candidates]);
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4">

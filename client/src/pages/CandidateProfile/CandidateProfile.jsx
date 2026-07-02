@@ -11,39 +11,6 @@ const CandidateProfile = () => {
 
   const candidate = candidates.find(c => c.id === id) || candidates[0];
 
-<<<<<<< Updated upstream
-  const skillData = [
-    { subject: 'Python', A: 95, B: 90, fullMark: 100 },
-    { subject: 'LLM/RAG', A: 90, B: 85, fullMark: 100 },
-    { subject: 'Cloud (AWS)', A: 80, B: 95, fullMark: 100 },
-    { subject: 'System Design', A: 85, B: 90, fullMark: 100 },
-    { subject: 'Leadership', A: 88, B: 75, fullMark: 100 },
-  ];
-
-=======
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const profileData = await candidateService.getCandidateById(id);
-        setCandidate(profileData);
-      } catch (err) {
-        console.error('Failed to load candidate profile:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
-        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-        <p className="text-sm font-medium">Retrieving candidate profile dossier...</p>
-      </div>
-    );
-  }
 
   if (!candidate) {
     return (
@@ -108,7 +75,6 @@ const CandidateProfile = () => {
     ] : []
   );
 
->>>>>>> Stashed changes
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <button 
@@ -129,21 +95,6 @@ const CandidateProfile = () => {
             <div className="grid grid-cols-2 gap-4 text-left text-sm mb-6">
               <div className="flex items-center gap-2">
                 <Briefcase size={16} className="text-primary" />
-<<<<<<< Updated upstream
-                <span>{candidate.exp}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-primary" />
-                <span>{candidate.loc}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <DollarSign size={16} className="text-primary" />
-                <span>₹25LPA Exp.</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-primary" />
-                <span>30 Days Notice</span>
-=======
                 <span>{candidate.yearsOfExperience ? `${candidate.yearsOfExperience} Yrs` : 'N/A'}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -157,7 +108,6 @@ const CandidateProfile = () => {
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-primary" />
                 <span>{candidate.noticePeriod || 'Immediate'}</span>
->>>>>>> Stashed changes
               </div>
             </div>
 
@@ -207,19 +157,11 @@ const CandidateProfile = () => {
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 border-primary/30 relative z-10">
               <div className="absolute inset-0 rounded-full border-8 border-primary border-t-transparent border-l-transparent transform rotate-45"></div>
               <div className="text-center">
-<<<<<<< Updated upstream
-                <span className="text-4xl font-bold text-white">{candidate.score}<span className="text-2xl text-white">%</span></span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-300 mt-4 relative z-10">
-              Highly aligned with JD requirements. Exceptional fit for Senior AI role.
-=======
                 <span className="text-4xl font-bold text-black">{candidate.score || 0}<span className="text-2xl text-black">%</span></span>
               </div>
             </div>
             <p className="text-sm text-textMuted mt-4 relative z-10">
               {candidate.score >= 90 ? 'Highly aligned with JD requirements. Exceptional fit for Senior AI role.' : 'Moderately matched. Focus on evaluating specific skill subsets.'}
->>>>>>> Stashed changes
             </p>
           </div>
         </div>

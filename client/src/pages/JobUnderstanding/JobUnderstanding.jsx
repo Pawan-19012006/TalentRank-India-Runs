@@ -1,25 +1,8 @@
-<<<<<<< Updated upstream
-import React from 'react';
-=======
 import React, { useState, useEffect, useMemo } from 'react';
->>>>>>> Stashed changes
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Target, Brain, ShieldAlert, Zap, TrendingUp, Lightbulb, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-<<<<<<< Updated upstream
-
-const JobUnderstanding = () => {
-  const navigate = useNavigate();
-  const skillData = [
-    { name: 'Python', level: 90 },
-    { name: 'LLM', level: 95 },
-    { name: 'RAG', level: 85 },
-    { name: 'Vector DB', level: 70 },
-    { name: 'AWS', level: 75 },
-  ];
-
-=======
 import { useRanking } from '../../store/rankingStore';
 import { topAssessmentSkills, datasetStatistics } from '../../data/inventoryData';
 
@@ -94,7 +77,6 @@ const JobUnderstanding = () => {
     );
   }
 
->>>>>>> Stashed changes
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -117,22 +99,6 @@ const JobUnderstanding = () => {
             </h2>
             <div className="space-y-4">
               <div>
-<<<<<<< Updated upstream
-                <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Role</p>
-                <p className="font-medium text-black">Senior AI Engineer</p>
-              </div>
-              <div>
-                <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Industry</p>
-                <p className="font-medium text-black">Healthcare Tech</p>
-              </div>
-              <div>
-                <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Level</p>
-                <p className="font-medium text-black">Senior</p>
-              </div>
-              <div>
-                <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Experience</p>
-                <p className="font-medium text-black">5 - 8 Years</p>
-=======
                 <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Target Role</p>
                 <p className="font-medium text-black">{jdDetails.role}</p>
               </div>
@@ -147,40 +113,18 @@ const JobUnderstanding = () => {
               <div>
                 <p className="text-xs text-textMuted uppercase font-bold tracking-wider mb-1">Experience Avg</p>
                 <p className="font-medium text-black">{jdDetails.experience}</p>
->>>>>>> Stashed changes
               </div>
             </div>
           </div>
 
-<<<<<<< Updated upstream
-          <div className="card-panel p-6 bg-gray-900 text-white relative overflow-hidden">
-             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/30 blur-3xl rounded-full"></div>
-            <h2 className="font-bold text-lg mb-4 flex items-center gap-2 relative z-10 text-white">
-=======
           <div className="card-panel p-6 bg-primary/5 border border-primary/20 relative overflow-hidden">
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/30 blur-3xl rounded-full"></div>
             <h2 className="font-bold text-lg mb-4 flex items-center gap-2 relative z-10 text-black">
->>>>>>> Stashed changes
               <Lightbulb size={18} className="text-primary" /> AI Generated Intent
             </h2>
             <p className="text-sm text-textMuted mb-3 relative z-10">
               Based on the data analysis, the ideal candidate requires:
             </p>
-<<<<<<< Updated upstream
-            <ul className="space-y-2 relative z-10">
-              {[
-                'Built production AI systems',
-                'Worked intimately with LLMs',
-                'Led technical teams',
-                'Deployed scalable APIs'
-              ].map((intent, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm font-medium">
-                  <span className="text-primary mt-0.5">•</span>
-                  {intent}
-                </li>
-              ))}
-            </ul>
-=======
             {intents.length > 0 ? (
               <ul className="space-y-2 relative z-10">
                 {intents.map((intent, i) => (
@@ -193,7 +137,6 @@ const JobUnderstanding = () => {
             ) : (
               <p className="text-xs text-gray-400 italic">No intent parameters generated.</p>
             )}
->>>>>>> Stashed changes
           </div>
         </div>
 
@@ -204,21 +147,6 @@ const JobUnderstanding = () => {
             </h2>
             <p className="text-sm text-textMuted mb-6">Normalized importance score based on assessment frequency in the talent pool.</p>
             <div className="h-64">
-<<<<<<< Updated upstream
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={skillData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-                  <XAxis type="number" domain={[0, 100]} hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontWeight: 500 }} width={80} />
-                  <Tooltip 
-                    cursor={{fill: '#f9fafb'}}
-                    contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    itemStyle={{ color: '#111827' }}
-                  />
-                  <Bar dataKey="level" fill="#10b981" radius={[0, 4, 4, 0]} barSize={24} />
-                </BarChart>
-              </ResponsiveContainer>
-=======
               {skillData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={skillData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
@@ -238,7 +166,6 @@ const JobUnderstanding = () => {
                   No skills identified to display on graph
                 </div>
               )}
->>>>>>> Stashed changes
             </div>
           </div>
 

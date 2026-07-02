@@ -2,11 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, FileText, Type, Sparkles, SlidersHorizontal, MapPin, Briefcase, DollarSign, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-<<<<<<< Updated upstream
-=======
-import { searchService } from '../../services/searchService';
 import { useRanking } from '../../store/rankingStore';
->>>>>>> Stashed changes
 
 const CreateSearch = () => {
   const navigate = useNavigate();
@@ -25,12 +21,9 @@ const CreateSearch = () => {
     level: 'Senior (5-8 yrs)'
   });
 
-<<<<<<< Updated upstream
-=======
   const { setWeightVector } = useRanking();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
->>>>>>> Stashed changes
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -87,8 +80,6 @@ const CreateSearch = () => {
     projects: 15
   });
 
-<<<<<<< Updated upstream
-=======
   const handleAnalyze = async () => {
     setIsSubmitting(true);
     const searchData = {
@@ -117,7 +108,6 @@ const CreateSearch = () => {
     }
   };
 
->>>>>>> Stashed changes
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
