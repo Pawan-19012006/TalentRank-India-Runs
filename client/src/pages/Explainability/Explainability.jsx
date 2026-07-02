@@ -1,17 +1,45 @@
-import React from 'react';
-import { HelpCircle, BarChart2, Zap, ArrowRight, ShieldCheck, Sliders } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { HelpCircle, BarChart2, ShieldCheck, Sliders, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useRanking } from '../../store/rankingStore';
+import { explainabilityService } from '../../services/explainabilityService';
 
 const Explainability = () => {
-  const { weightVector, setWeightVector } = useRanking();
+  const { weightVector, setWeightVector, candidates, loading } = useRanking();
+  const [shapData, setShapData] = useState([]);
+  const [shapLoading, setShapLoading] = useState(true);
 
-  const shapData = [
-    { name: 'Core Skills', value: weightVector.skills, fill: '#ff5722' },
-    { name: 'Experience', value: weightVector.experience, fill: '#ff5722' },
-    { name: 'Behavior', value: weightVector.behavior, fill: '#ff5722' },
-    { name: 'Hidden Talent', value: weightVector.hidden_talent, fill: '#8b5cf6' }
-  ];
+  const topCandidate = candidates[0];
+
+  useEffect(() => {
+    const fetchShap = async () => {
+      if (!topCandidate) {
+        setShapData([]);
+        setShapLoading(false);
+        return;
+      }
+      setShapLoading(true);
+      try {
+        const data = await explainabilityService.getShapContributions(topCandidate.id, 'default_search');
+        setShapData(data);
+      } catch (err) {
+        console.error('Failed to load SHAP explainability variables:', err);
+        setShapData([]);
+      } finally {
+        setShapLoading(false);
+      }
+    };
+    fetchShap();
+  }, [topCandidate]);
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center text-textMuted space-y-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-sm font-medium">Loading model weights...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -25,23 +53,44 @@ const Explainability = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
           <div className="card-panel p-6">
-            <h2 className="font-bold text-lg mb-4 flex items-center gap-2 border-b border-border pb-3 text-black">
-              <HelpCircle size={18} className="text-primary" /> Why is John Doe Ranked #1?
-            </h2>
-            <p className="text-sm text-textMuted mb-4">
-              John achieved an overall match score of <strong className="text-black">94%</strong>. Here is the exact breakdown of features contributing to this score.
-            </p>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={shapData} layout="vertical" margin={{ top: 0, right: 30, left: 120, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                  <Tooltip cursor={{fill: '#f9fafb'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {shapLoading ? (
+              <div className="h-72 flex flex-col items-center justify-center text-textMuted space-y-2">
+                <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+                <p className="text-xs">Computing feature importance...</p>
+              </div>
+            ) : topCandidate ? (
+              <>
+                <h2 className="font-bold text-lg mb-4 flex items-center gap-2 border-b border-border pb-3 text-black">
+                  <HelpCircle size={18} className="text-primary" /> Why is {topCandidate.name} Ranked #1?
+                </h2>
+                <p className="text-sm text-textMuted mb-4">
+                  John achieved an overall match score of <strong className="text-black">{topCandidate.score}%</strong>. Here is the exact breakdown of features contributing to this score.
+                </p>
+                <div className="h-72">
+                  {shapData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={shapData} layout="vertical" margin={{ top: 0, right: 30, left: 120, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
+                        <Tooltip cursor={{fill: '#f9fafb'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#ffffff', color: '#111827', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-textMuted text-xs font-medium border border-dashed border-border rounded-lg bg-gray-50">
+                      No SHAP contribution factors returned for candidate
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="h-80 flex flex-col items-center justify-center text-textMuted p-6 text-center">
+                <AlertCircle size={36} className="text-gray-300 mb-2" />
+                <h3 className="text-sm font-bold text-black mb-1">No Active Candidates</h3>
+                <p className="text-xs text-textMuted max-w-xs">Score analysis is not available because there are no candidates matching the active search parameters.</p>
+              </div>
+            )}
           </div>
 
           <div className="card-panel p-6">
@@ -84,14 +133,14 @@ const Explainability = () => {
                 <div key={w.key}>
                   <div className="flex justify-between text-xs mb-2">
                     <span className={w.key === 'hidden_talent' ? 'text-primary font-bold text-white' : 'text-white'}>{w.label}</span>
-                    <span className="font-bold text-white">{weightVector[w.key]}%</span>
+                    <span className="font-bold text-white">{weightVector[w.key] || 0}%</span>
                   </div>
                   <input 
                     type="range" 
                     min="0" 
                     max="100" 
-                    value={weightVector[w.key]}
-                    onChange={(e) => setWeightVector({...weightVector, [w.key]: parseInt(e.target.value)})}
+                    value={weightVector[w.key] || 0}
+                    onChange={(e) => setWeightVector({...weightVector, [w.key]: parseInt(e.target.value) || 0})}
                     className="w-full h-1 bg-gray-700 accent-primary rounded-lg appearance-none cursor-pointer" 
                   />
                 </div>

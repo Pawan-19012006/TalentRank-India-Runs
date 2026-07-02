@@ -1,13 +1,25 @@
-const express = require('express')
-const cors = require('cors')
-const dotenv = require('dotenv').config()
+const app = require('./src/app');
+const logger = require('./src/utils/logger');
+const dotenv = require('dotenv');
 
-const app = express()
-const PORT = process.env.PORT || 5001
+// Load environment variables
+dotenv.config();
 
-app.use(cors())
-app.use(express.json())
+const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-})
+const server = app.listen(PORT, () => {
+  logger.info(`Server successfully started in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
+
+// Graceful Shutdown & Process Crash Handling
+process.on('unhandledRejection', (err) => {
+  logger.error('UNHANDLED REJECTION! Shutting down server...', err);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error('UNCAUGHT EXCEPTION! Shutting down process immediately...', err);
+  process.exit(1);
+});

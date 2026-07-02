@@ -1,0 +1,125 @@
+field,types,count
+candidate_id,str,5001
+career_history,array,5001
+career_history[].company,str,5001
+career_history[].company_size,str,5001
+career_history[].description,str,5001
+career_history[].duration_months,int,5001
+career_history[].end_date,NoneType,5001
+career_history[].industry,str,5001
+career_history[].is_current,bool,5001
+career_history[].start_date,str,5001
+career_history[].title,str,5001
+certifications,array,5001
+certifications[].issuer,str,1227
+certifications[].name,str,1227
+certifications[].year,int,1227
+education,array,5001
+education[].degree,str,5001
+education[].end_year,int,5001
+education[].field_of_study,str,5001
+education[].grade,str,5001
+education[].institution,str,5001
+education[].start_year,int,5001
+education[].tier,str,5001
+languages,array,5001
+languages[].language,str,5001
+languages[].proficiency,str,5001
+profile,object,5001
+profile.anonymized_name,str,5001
+profile.country,str,5001
+profile.current_company,str,5001
+profile.current_company_size,str,5001
+profile.current_industry,str,5001
+profile.current_title,str,5001
+profile.headline,str,5001
+profile.location,str,5001
+profile.summary,str,5001
+profile.years_of_experience,float,5001
+redrob_signals,object,5001
+redrob_signals.applications_submitted_30d,int,5001
+redrob_signals.avg_response_time_hours,float,5001
+redrob_signals.connection_count,int,5001
+redrob_signals.endorsements_received,int,5001
+redrob_signals.expected_salary_range_inr_lpa,object,5001
+redrob_signals.expected_salary_range_inr_lpa.max,float,5001
+redrob_signals.expected_salary_range_inr_lpa.min,float,5001
+redrob_signals.github_activity_score,"float, int",5001
+redrob_signals.interview_completion_rate,float,5001
+redrob_signals.last_active_date,str,5001
+redrob_signals.linkedin_connected,bool,5001
+redrob_signals.notice_period_days,int,5001
+redrob_signals.offer_acceptance_rate,"float, int",5001
+redrob_signals.open_to_work_flag,bool,5001
+redrob_signals.preferred_work_mode,str,5001
+redrob_signals.profile_completeness_score,float,5001
+redrob_signals.profile_views_received_30d,int,5001
+redrob_signals.recruiter_response_rate,float,5001
+redrob_signals.saved_by_recruiters_30d,int,5001
+redrob_signals.search_appearance_30d,int,5001
+redrob_signals.signup_date,str,5001
+redrob_signals.skill_assessment_scores,object,5001
+redrob_signals.skill_assessment_scores.ASR,float,48
+redrob_signals.skill_assessment_scores.BM25,float,18
+redrob_signals.skill_assessment_scores.BentoML,float,70
+redrob_signals.skill_assessment_scores.CNN,float,67
+redrob_signals.skill_assessment_scores.Computer Vision,float,52
+redrob_signals.skill_assessment_scores.Data Science,float,49
+redrob_signals.skill_assessment_scores.Deep Learning,float,13
+redrob_signals.skill_assessment_scores.Diffusion Models,float,52
+redrob_signals.skill_assessment_scores.Elasticsearch,float,23
+redrob_signals.skill_assessment_scores.Embeddings,float,18
+redrob_signals.skill_assessment_scores.FAISS,float,17
+redrob_signals.skill_assessment_scores.Feature Engineering,float,57
+redrob_signals.skill_assessment_scores.Fine-tuning LLMs,float,13
+redrob_signals.skill_assessment_scores.Forecasting,float,59
+redrob_signals.skill_assessment_scores.GANs,float,54
+redrob_signals.skill_assessment_scores.Haystack,float,11
+redrob_signals.skill_assessment_scores.Hugging Face Transformers,float,10
+redrob_signals.skill_assessment_scores.Image Classification,float,79
+redrob_signals.skill_assessment_scores.Information Retrieval,float,18
+redrob_signals.skill_assessment_scores.Kubeflow,float,43
+redrob_signals.skill_assessment_scores.LLMs,float,24
+redrob_signals.skill_assessment_scores.LangChain,float,11
+redrob_signals.skill_assessment_scores.Learning to Rank,float,14
+redrob_signals.skill_assessment_scores.LlamaIndex,float,17
+redrob_signals.skill_assessment_scores.LoRA,float,19
+redrob_signals.skill_assessment_scores.MLOps,float,59
+redrob_signals.skill_assessment_scores.MLflow,float,40
+redrob_signals.skill_assessment_scores.Machine Learning,float,16
+redrob_signals.skill_assessment_scores.Milvus,float,20
+redrob_signals.skill_assessment_scores.NLP,float,12
+redrob_signals.skill_assessment_scores.Object Detection,float,72
+redrob_signals.skill_assessment_scores.OpenCV,float,62
+redrob_signals.skill_assessment_scores.OpenSearch,float,17
+redrob_signals.skill_assessment_scores.PEFT,float,17
+redrob_signals.skill_assessment_scores.Pinecone,float,21
+redrob_signals.skill_assessment_scores.Prompt Engineering,float,18
+redrob_signals.skill_assessment_scores.PyTorch,float,14
+redrob_signals.skill_assessment_scores.Python,float,17
+redrob_signals.skill_assessment_scores.QLoRA,float,14
+redrob_signals.skill_assessment_scores.Qdrant,float,25
+redrob_signals.skill_assessment_scores.RAG,float,17
+redrob_signals.skill_assessment_scores.Recommendation Systems,float,22
+redrob_signals.skill_assessment_scores.Reinforcement Learning,float,52
+redrob_signals.skill_assessment_scores.Semantic Search,float,13
+redrob_signals.skill_assessment_scores.Sentence Transformers,float,20
+redrob_signals.skill_assessment_scores.Speech Recognition,float,51
+redrob_signals.skill_assessment_scores.Statistical Modeling,float,52
+redrob_signals.skill_assessment_scores.TTS,float,59
+redrob_signals.skill_assessment_scores.TensorFlow,float,21
+redrob_signals.skill_assessment_scores.Time Series,float,52
+redrob_signals.skill_assessment_scores.Vector Search,float,14
+redrob_signals.skill_assessment_scores.Weaviate,float,11
+redrob_signals.skill_assessment_scores.Weights & Biases,float,62
+redrob_signals.skill_assessment_scores.YOLO,float,71
+redrob_signals.skill_assessment_scores.pgvector,float,16
+redrob_signals.skill_assessment_scores.scikit-learn,float,10
+redrob_signals.verified_email,bool,5001
+redrob_signals.verified_phone,bool,5001
+redrob_signals.willing_to_relocate,bool,5001
+skills,array,5001
+skills[].duration_months,int,5001
+skills[].endorsements,int,5001
+skills[].name,str,5001
+skills[].proficiency,str,5001

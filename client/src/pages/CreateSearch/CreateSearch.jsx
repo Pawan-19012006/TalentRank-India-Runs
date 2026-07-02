@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, FileText, Type, Sparkles, SlidersHorizontal, MapPin, Briefcase, DollarSign, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { searchService } from '../../services/searchService';
 
 const CreateSearch = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const CreateSearch = () => {
     required: 'Python, LLM, RAG',
     level: 'Senior (5-8 yrs)'
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -48,7 +51,6 @@ const CreateSearch = () => {
     if (!aiPrompt.trim()) return;
     setIsGenerating(true);
     
-    // Simple heuristic to extract role and keywords
     const inputStr = aiPrompt.trim();
     const newRole = inputStr.length > 40 ? inputStr.substring(0, 40) + '...' : inputStr.replace(/\b\w/g, l => l.toUpperCase());
     
@@ -75,6 +77,33 @@ const CreateSearch = () => {
     behavior: 20,
     projects: 15
   });
+
+  const handleAnalyze = async () => {
+    setIsSubmitting(true);
+    const searchData = {
+      activeTab,
+      pastedJd,
+      uploadedFile: uploadedFile ? uploadedFile.name : null,
+      filters: {
+        experience: '5-8 Yrs',
+        location: 'Bangalore, Remote',
+        salary: '₹20LPA - ₹30LPA',
+        employmentType: 'Full-time'
+      },
+      weights
+    };
+
+    try {
+      const search = await searchService.createSearch(searchData);
+      const searchId = search?.id || 'default_search';
+      navigate('/rankings', { state: { searchId } });
+    } catch (err) {
+      console.error('Failed to register search criteria:', err);
+      navigate('/rankings');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -284,10 +313,18 @@ const CreateSearch = () => {
               </div>
             </div>
             <button 
-              onClick={() => navigate('/rankings')}
-              className="w-full mt-6 bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-dark transition-colors shadow-sm relative z-10"
+              onClick={handleAnalyze}
+              disabled={isSubmitting}
+              className="w-full mt-6 bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-dark transition-colors shadow-sm relative z-10 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Analyze Job & Find Candidates
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                  Analyzing...
+                </>
+              ) : (
+                "Analyze Job & Find Candidates"
+              )}
             </button>
           </div>
         </div>
