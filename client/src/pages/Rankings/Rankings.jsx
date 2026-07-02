@@ -110,53 +110,81 @@ const Rankings = () => {
                         </div>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-5 gap-2 text-center text-xs">
-                        <div className="bg-gray-50 border border-border p-2 rounded-lg">
-                          <span className="block text-textMuted mb-1">Skills</span>
-                          <span className="font-bold text-black">{c.skills}%</span>
+                      {/* Explainable Intelligence Metrics */}
+                      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm border-t border-border pt-4">
+                        <div>
+                          <span className="block text-textMuted text-xs font-bold uppercase tracking-wider mb-2">Skill Alignment</span>
+                          <div className="space-y-1.5">
+                            <div className="flex flex-wrap gap-1 items-center">
+                              <span className="text-textMuted text-xs font-medium mr-1">Matched:</span>
+                              {c.matchedSkills && c.matchedSkills.length > 0 ? (
+                                c.matchedSkills.map((sk, i) => (
+                                  <span key={i} className="bg-green-50 text-green-700 text-[10px] px-2 py-0.5 rounded border border-green-200 font-semibold">{sk}</span>
+                                ))
+                              ) : (
+                                <span className="text-textMuted text-xs italic">None</span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-1 items-center">
+                              <span className="text-textMuted text-xs font-medium mr-1">Missing:</span>
+                              {c.missingSkills && c.missingSkills.length > 0 ? (
+                                c.missingSkills.map((sk, i) => (
+                                  <span key={i} className="bg-red-50 text-red-700 text-[10px] px-2 py-0.5 rounded border border-red-200 font-semibold">{sk}</span>
+                                ))
+                              ) : (
+                                <span className="text-green-700 text-xs font-semibold">None (Full Match)</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="bg-gray-50 border border-border p-2 rounded-lg">
-                          <span className="block text-textMuted mb-1">Experience</span>
-                          <span className="font-bold text-black">{c.experience}%</span>
-                        </div>
-                        <div className="bg-gray-50 border border-border p-2 rounded-lg">
-                          <span className="block text-textMuted mb-1">Behavior</span>
-                          <span className="font-bold text-black">{c.behavior}%</span>
-                        </div>
-                        <div className="bg-gray-50 border border-border p-2 rounded-lg">
-                          <span className="block text-textMuted mb-1">Activity</span>
-                          <span className="font-bold text-black">{c.activity}%</span>
-                        </div>
-                        <div className="bg-primary/10 p-2 rounded-lg border border-primary/20 group-hover:border-primary/40 transition-all">
-                          <span className="block text-primary mb-1">Hidden</span>
-                          <span className="font-bold text-primary">{c.hidden_talent_score}%</span>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-textMuted text-xs font-bold uppercase tracking-wider">Relevant Experience:</span>
+                            <span className="font-bold text-black text-xs">{c.relevantExperience || 'N/A'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-textMuted text-xs font-bold uppercase tracking-wider">Domain Relevance:</span>
+                            <span className="font-semibold text-black text-xs">{c.domainRelevance || 'General'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-textMuted text-xs font-bold uppercase tracking-wider">Project Relevance:</span>
+                            <span className="font-semibold text-black text-xs">{c.projectRelevance || 'Standard'}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {index === 0 && (
-                        <div className="mt-4 bg-primary/5 border border-primary/20 p-3 rounded-lg text-sm">
-                          <h4 className="font-bold text-primary flex items-center gap-1 mb-1">
-                            <Sparkles size={14} /> Why Ranked #1
-                          </h4>
-                          <ul className="text-textMuted text-xs space-y-1 ml-4 list-disc">
-                            <li>Strong RAG experience</li>
-                            <li>Active GenAI contributor</li>
-                            <li>Similar healthcare projects</li>
-                            <li>Consistent career progression</li>
-                          </ul>
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-gray-50 border border-border p-3 rounded-xl">
+                        <div className="text-green-800">
+                          <strong className="block text-green-700 font-bold mb-1">Key Strengths:</strong>
+                          {c.keyStrengths && c.keyStrengths.length > 0 ? (
+                            <ul className="list-disc pl-4 space-y-0.5">
+                              {c.keyStrengths.map((str, i) => <li key={i}>{str}</li>)}
+                            </ul>
+                          ) : (
+                            <p className="italic text-green-700">None logged</p>
+                          )}
                         </div>
-                      )}
+                        <div className="text-red-800 border-t md:border-t-0 md:border-l border-border pt-2 md:pt-0 md:pl-3">
+                          <strong className="block text-red-700 font-bold mb-1">Potential Gaps:</strong>
+                          {c.potentialGaps && c.potentialGaps.length > 0 ? (
+                            <ul className="list-disc pl-4 space-y-0.5">
+                              {c.potentialGaps.map((gap, i) => <li key={i}>{gap}</li>)}
+                            </ul>
+                          ) : (
+                            <p className="italic text-green-700">No flags detected</p>
+                          )}
+                        </div>
+                      </div>
 
-                      {c.hidden_talent_factors?.length > 0 && (
-                        <div className="mt-4 bg-purple-50 border border-purple-200 p-3 rounded-lg text-sm">
-                          <h4 className="font-bold text-purple-600 flex items-center gap-1 mb-1">
-                            <Sparkles size={14} /> Hidden Talent Factors
-                          </h4>
-                          <ul className="text-purple-700 text-xs space-y-1 ml-4 list-disc">
-                            {c.hidden_talent_factors.map((f, i) => <li key={i}>{f}</li>)}
-                          </ul>
-                        </div>
-                      )}
+                      <div className="mt-4 bg-primary/5 border border-primary/20 p-3 rounded-xl text-sm">
+                        <h4 className="font-bold text-primary flex items-center gap-1.5 mb-1">
+                          <Sparkles size={14} /> Why Ranked
+                        </h4>
+                        <p className="text-textMuted leading-relaxed text-xs">
+                          {c.whyRankedReason || "Ranked based on skill alignments and experience."}
+                        </p>
+                      </div>
 
                       <div className="mt-4 flex gap-2">
                         <button 
